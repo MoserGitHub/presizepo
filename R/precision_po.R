@@ -76,12 +76,12 @@ build_arm_probs <- function(pc, OR = NULL, pe = NULL, rr = NULL) {
 #' pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
 #' se_binary_po(pc, OR = 1.7, n = 30, method = "whitehead")
 #' se_binary_po(pc, OR = 1.7, n = 30, method = "ologit")
-se_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, n, r = 1,
+se_binary_po <- function(p0, OR = NULL, pe = NULL, rr = NULL, n, r = 1,
                          method = c("ologit", "whitehead"), conf = 0.95) {
   method <- match.arg(method)
   z <- stats::qnorm(1 - (1 - conf) / 2)
 
-  probs <- build_arm_probs(pc, OR, pe, rr)
+  probs <- build_arm_probs(p0, OR, pe, rr)
   p_ctrl <- probs$p_ctrl; p_trt <- probs$p_trt
   levels_n <- length(p_ctrl)
   level_int <- rep(seq_len(levels_n), 2)
@@ -240,8 +240,8 @@ n_precision_cont_po <- function(p0, beta, sd_x, ratio_UL, delta = 1, R2 = 0, con
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
   fit0 <- se_cont_po(p0, beta, sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
   n <- ceiling(n0 * (fit0[["SE"]] / target_se)^2)
-  list(n = n, or = exp(beta), method = method,
-       lci = exp(beta - z * target_se), uci = exp(beta + z * target_se))
+  list(n = n, or = exp(delta * beta), method = method,
+       lci = exp(delta * (beta - z * target_se)), uci = exp(delta * (beta + z * target_se)))
 }
 
 
