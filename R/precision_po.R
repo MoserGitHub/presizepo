@@ -147,6 +147,26 @@ n_precision_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, ratio_UL,
 }
 
 
+#' Resolve the per-unit log OR for a continuous predictor (internal)
+#'
+#' `beta` (per raw unit of `x`) and `OR_sd` (odds ratio per SD of `x`) are
+#' two ways of specifying the same effect; exactly one must be supplied.
+#' This converts either into the per-unit log OR used internally by
+#' [se_cont_po()] and [n_precision_cont_po()].
+#'
+#' @param beta Log OR per unit of `x`, or `NULL`.
+#' @param OR_sd Odds ratio per SD of `x`, or `NULL`.
+#' @param sd_x SD of the predictor `x`.
+#'
+#' @return The per-unit log OR (a single number).
+#' @noRd
+resolve_beta_cont <- function(beta, OR_sd, sd_x) {
+  n_specified <- sum(!is.null(beta), !is.null(OR_sd))
+  if (n_specified != 1) stop("please specify exactly one of beta, OR_sd")
+  if (is.null(beta)) beta <- log(OR_sd) / sd_x
+  beta
+}
+
 #' Standard error of the log OR per unit of a continuous predictor
 #'
 #' Computes the standard error (and confidence interval) of the log odds
@@ -154,7 +174,13 @@ n_precision_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, ratio_UL,
 #' model, at a given total sample size `n`.
 #'
 #' @param p0 Outcome category probabilities at `x = mean(x)`.
-#' @param beta Log OR per unit of `x`.
+#' @param beta Log OR per unit of `x`. Exactly one of `beta`, `OR_sd` must
+#'   be supplied.
+#' @param OR_sd Odds ratio per SD of `x` (i.e. the OR comparing `x` one SD
+#'   above the mean to the mean), given as an alternative to `beta` so
+#'   `sd_x` and the effect size don't need to be reconciled by hand;
+#'   internally converted to `beta = log(OR_sd) / sd_x`. Exactly one of
+#'   `beta`, `OR_sd` must be supplied.
 #' @param sd_x SD of the predictor `x`.
 #' @param n Total sample size.
 #' @param R2 Proportion of variance of `x` explained by other covariates
@@ -180,9 +206,12 @@ n_precision_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, ratio_UL,
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 #' se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
 #' se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
-se_cont_po <- function(p0, beta, sd_x, n, R2 = 0,
+#' # equivalently, specifying the effect as an OR per SD of x
+#' se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
+se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95) {
   method <- match.arg(method)
+  beta <- resolve_beta_cont(beta, OR_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   levels_n <- length(p0)
   th <- stats::qlogis(cumsum(p0)[-levels_n])
@@ -226,19 +255,26 @@ se_cont_po <- function(p0, beta, sd_x, n, R2 = 0,
 #'   rescaling; the default is large enough that further increases do not
 #'   change the result.
 #'
-#' @return A list with elements `n`, `or`, `method`, `lci`, `uci`.
+#' @return A list with elements `n`, `or`, `method`, `lci`, `uci`. `or`,
+#'   `lci`, and `uci` are expressed for a change of `delta` units of `x`
+#'   (not a 1-unit change), matching the scale on which `ratio_UL` was
+#'   specified.
 #' @export
 #'
 #' @examples
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 #' n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 #' n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
-n_precision_cont_po <- function(p0, beta, sd_x, ratio_UL, delta = 1, R2 = 0, conf = 0.95,
-                                method = c("ologit", "whitehead"), ngrid = 15, n0 = 1000) {
+#' # equivalently, specifying the effect as an OR per SD of x
+#' n_precision_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po <- function(p0, beta = NULL, sd_x, ratio_UL, delta = 1, R2 = 0, conf = 0.95,
+                                OR_sd = NULL, method = c("ologit", "whitehead"), ngrid = 15,
+                                n0 = 1000) {
   method <- match.arg(method)
+  beta <- resolve_beta_cont(beta, OR_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
-  fit0 <- se_cont_po(p0, beta, sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
+  fit0 <- se_cont_po(p0, beta = beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
   n <- ceiling(n0 * (fit0[["SE"]] / target_se)^2)
   list(n = n, or = exp(delta * beta), method = method,
        lci = exp(delta * (beta - z * target_se)), uci = exp(delta * (beta + z * target_se)))

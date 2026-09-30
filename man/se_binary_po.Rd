@@ -5,7 +5,7 @@
 \title{Standard error of the log odds ratio, binary predictor}
 \usage{
 se_binary_po(
-  pc,
+  p0,
   OR = NULL,
   pe = NULL,
   rr = NULL,
@@ -16,8 +16,6 @@ se_binary_po(
 )
 }
 \arguments{
-\item{pc}{Control-arm category probabilities (sum to 1).}
-
 \item{OR, pe, rr}{Exactly one, defining the experimental arm; see
 \code{\link[=build_arm_probs]{build_arm_probs()}}.}
 
@@ -29,6 +27,8 @@ se_binary_po(
 (delta-method approximation).}
 
 \item{conf}{Confidence level for the reported interval.}
+
+\item{pc}{Control-arm category probabilities (sum to 1).}
 }
 \value{
 A list with elements \code{OR}, \code{conf}, \code{SE} (of the log OR), \code{lower},

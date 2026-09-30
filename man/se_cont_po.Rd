@@ -6,10 +6,11 @@
 \usage{
 se_cont_po(
   p0,
-  beta,
+  beta = NULL,
   sd_x,
   n,
   R2 = 0,
+  OR_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
   conf = 0.95
@@ -18,7 +19,8 @@ se_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
 
-\item{beta}{Log OR per unit of \code{x}.}
+\item{beta}{Log OR per unit of \code{x}. Exactly one of \code{beta}, \code{OR_sd} must
+be supplied.}
 
 \item{sd_x}{SD of the predictor \code{x}.}
 
@@ -27,6 +29,12 @@ se_cont_po(
 \item{R2}{Proportion of variance of \code{x} explained by other covariates
 (their inclusion reduces the effective information for \code{beta} by a
 factor of \code{1 - R2}).}
+
+\item{OR_sd}{Odds ratio per SD of \code{x} (i.e. the OR comparing \code{x} one SD
+above the mean to the mean), given as an alternative to \code{beta} so
+\code{sd_x} and the effect size don't need to be reconciled by hand;
+internally converted to \code{beta = log(OR_sd) / sd_x}. Exactly one of
+\code{beta}, \code{OR_sd} must be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
 \code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}, so \code{SE(beta)} reflects
@@ -55,4 +63,6 @@ model, at a given total sample size \code{n}.
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
 se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
+# equivalently, specifying the effect as an OR per SD of x
+se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
 }

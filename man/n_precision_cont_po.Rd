@@ -6,12 +6,13 @@
 \usage{
 n_precision_cont_po(
   p0,
-  beta,
+  beta = NULL,
   sd_x,
   ratio_UL,
   delta = 1,
   R2 = 0,
   conf = 0.95,
+  OR_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
   n0 = 1000
@@ -20,7 +21,8 @@ n_precision_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
 
-\item{beta}{Log OR per unit of \code{x}.}
+\item{beta}{Log OR per unit of \code{x}. Exactly one of \code{beta}, \code{OR_sd} must
+be supplied.}
 
 \item{sd_x}{SD of the predictor \code{x}.}
 
@@ -35,6 +37,12 @@ expressed.}
 factor of \code{1 - R2}).}
 
 \item{conf}{Confidence level for the reported interval.}
+
+\item{OR_sd}{Odds ratio per SD of \code{x} (i.e. the OR comparing \code{x} one SD
+above the mean to the mean), given as an alternative to \code{beta} so
+\code{sd_x} and the effect size don't need to be reconciled by hand;
+internally converted to \code{beta = log(OR_sd) / sd_x}. Exactly one of
+\code{beta}, \code{OR_sd} must be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
 \code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}, so \code{SE(beta)} reflects
@@ -53,7 +61,10 @@ rescaling; the default is large enough that further increases do not
 change the result.}
 }
 \value{
-A list with elements \code{n}, \code{or}, \code{method}, \code{lci}, \code{uci}.
+A list with elements \code{n}, \code{or}, \code{method}, \code{lci}, \code{uci}. \code{or},
+\code{lci}, and \code{uci} are expressed for a change of \code{delta} units of \code{x}
+(not a 1-unit change), matching the scale on which \code{ratio_UL} was
+specified.
 }
 \description{
 Computes the total sample size \code{n} needed so that the confidence
@@ -65,4 +76,6 @@ fit-once-and-rescale trick as \code{\link[=n_precision_binary_po]{n_precision_bi
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
+# equivalently, specifying the effect as an OR per SD of x
+n_precision_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 }
