@@ -92,14 +92,13 @@ vs. control), via <code><a href="../reference/se_binary_po.html">se_binary_po()
 <ul>
 <li>
 <code>"whitehead"</code> - Whitehead’s (1993) closed-form
-delta-method variance approximation. Fast, but assumes proportional odds
-and can be inaccurate for large effects.</li>
+delta-method variance approximation. Assumes proportional odds and can
+be inaccurate for large effects.</li>
 <li>
 <code>"ologit"</code> (default) - fits a weighted proportional-odds
 model directly to the anticipated distribution and reads the standard
-error off the observed information matrix. This is exact (no
-delta-method approximation), following White, Marley-Zagar, Morris,
-Parmar, Royston &amp; Babiker (2023).</li>
+error off the observed information matrix, following White,
+Marley-Zagar, Morris, Parmar, Royston &amp; Babiker (2023).</li>
 </ul>
 <p>The two methods nearly agree for small effects and diverge as the
 anticipated effect size grows.</p>
@@ -236,15 +235,6 @@ CI-width ratio, expressed for the OR per <code>delta</code> units of
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $uci</span></span>
 <span><span class="co">#&gt; [1] 2.598076</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="choosing-a-method">Choosing a method<a class="anchor" aria-label="anchor" href="#choosing-a-method"></a>
-</h2>
-<p><code>"ologit"</code> is the exact calculation and is the default;
-<code>"whitehead"</code> is faster and closed-form but relies on a
-delta-method approximation that can understate uncertainty for larger
-anticipated effects. When in doubt, compare both, as done above, and
-prefer <code>"ologit"</code> if they diverge meaningfully.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
