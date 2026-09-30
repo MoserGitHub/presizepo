@@ -1,0 +1,41 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# `presizepo`
+
+`presizepo` is a precision-based (confidence-interval width) sample size approach for the log odds ratio in a proportional-odds model, for either a binary or continuouse predictor
+
+
+## Installation
+
+`presizepo` can be installed via 
+
+```{r, eval = FALSE}
+install.packages('presizepo', repos = c('https://dcr-unibe-ch.r-universe.dev', 'https://cloud.r-project.org'))
+```
+
+or via
+
+```{r, eval = FALSE}
+remotes::install_github("dcr-unibe-ch/presizepo")
+```
+
+This may require `Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")` if packages were built under a different R version to the one you are using.
+
+## Usage
+
+```{r, message=FALSE}
+library(presizepo)
+```
+
+
