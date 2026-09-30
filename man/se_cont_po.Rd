@@ -13,7 +13,8 @@ se_cont_po(
   OR_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
-  conf = 0.95
+  conf = 0.95,
+  delta = 1
 )
 }
 \arguments{
@@ -49,10 +50,16 @@ cutpoints derived from \code{p0}.}
 \code{method = "ologit"}).}
 
 \item{conf}{Confidence level for the reported interval.}
+
+\item{delta}{Number of units of \code{x} over which the OR (and its CI) is
+expressed; \code{beta}, \code{SE}, and the CI limits are all scaled by \code{delta}
+before exponentiating (the linear predictor is \code{beta * x}, so this
+rescaling is exact). Defaults to 1 (per 1 unit of \code{x}).}
 }
 \value{
 A named numeric vector with elements \code{beta}, \code{SE}, \code{lower},
-\code{upper} (the last two on the OR scale).
+\code{upper} (the last two on the OR scale), all expressed for a change of
+\code{delta} units of \code{x}.
 }
 \description{
 Computes the standard error (and confidence interval) of the log odds
@@ -65,4 +72,6 @@ se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
 se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
 # equivalently, specifying the effect as an OR per SD of x
 se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
+# OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
+se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
 }

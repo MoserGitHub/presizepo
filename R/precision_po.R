@@ -197,9 +197,14 @@ resolve_beta_cont <- function(beta, OR_sd, sd_x) {
 #' @param ngrid Number of Gauss-Hermite quadrature nodes (only used for
 #'   `method = "ologit"`).
 #' @param conf Confidence level for the reported interval.
+#' @param delta Number of units of `x` over which the OR (and its CI) is
+#'   expressed; `beta`, `SE`, and the CI limits are all scaled by `delta`
+#'   before exponentiating (the linear predictor is `beta * x`, so this
+#'   rescaling is exact). Defaults to 1 (per 1 unit of `x`).
 #'
 #' @return A named numeric vector with elements `beta`, `SE`, `lower`,
-#'   `upper` (the last two on the OR scale).
+#'   `upper` (the last two on the OR scale), all expressed for a change of
+#'   `delta` units of `x`.
 #' @export
 #'
 #' @examples
@@ -208,8 +213,11 @@ resolve_beta_cont <- function(beta, OR_sd, sd_x) {
 #' se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
 #' # equivalently, specifying the effect as an OR per SD of x
 #' se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
+#' # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
+#' se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
 se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
-                       method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95) {
+                       method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
+                       delta = 1) {
   method <- match.arg(method)
   beta <- resolve_beta_cont(beta, OR_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
@@ -236,7 +244,10 @@ se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
     se <- fit$SE_b
     beta_est <- fit$b
   }
-  c(beta = beta_est, SE = se, lower = exp(beta_est - z * se), upper = exp(beta_est + z * se))
+
+  beta_d <- delta * beta_est
+  se_d <- delta * se
+  c(beta = beta_d, SE = se_d, lower = exp(beta_d - z * se_d), upper = exp(beta_d + z * se_d))
 }
 
 #' Sample size for a target OR precision, continuous predictor
