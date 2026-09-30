@@ -223,11 +223,25 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #'   CI) is expressed; `beta`, `SE`, and the CI limits are all scaled by
 #'   `delta` before exponentiating (the linear predictor is `beta * x`, so
 #'   this rescaling is exact). At most one of `delta`, `delta_sd` may be
-#'   supplied; defaults to 1 (raw unit of `x`) if neither is given.
+#'   supplied; defaults to 1 (raw unit of `x`) if neither is given. Note
+#'   `delta`/`delta_sd` only change what change in `x` the *output* is
+#'   expressed over; they do not alter `beta`/`OR_sd` itself, which is
+#'   always a per-1-unit/per-1-SD effect (see Details).
 #' @param delta_sd Change in `x`, in SDs of `x`, given as an alternative to
 #'   `delta` so `sd_x` doesn't need to be multiplied in by hand; internally
 #'   converted to `delta = delta_sd * sd_x`. At most one of `delta`,
 #'   `delta_sd` may be supplied.
+#'
+#' @details
+#' `OR_sd` and `delta_sd` both reference the SD of `x`, but play different
+#' roles and are easy to conflate: `OR_sd` is *always* the odds ratio for a
+#' 1-SD change (it fixes `beta`), while `delta_sd` says how many SDs the
+#' *reported* OR should span. Because the log OR is linear in `x`, the
+#' reported OR for a `delta_sd`-SD change is `OR_sd^delta_sd`, not `OR_sd`
+#' itself. For example, `OR_sd = 1.5` with `delta_sd = 2` reports an OR of
+#' `1.5^2 = 2.25` (the OR for a 2-SD change), not 1.5 (see final example
+#' below). To report an OR of 1.5 *for* a 2-SD change, supply
+#' `OR_sd = sqrt(1.5)` together with `delta_sd = 2`.
 #'
 #' @return A named numeric vector with elements `beta`, `SE`, `lower`,
 #'   `upper` (the last two on the OR scale), all expressed for the change
@@ -244,6 +258,14 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
 #' # equivalently, specifying the change directly in SDs of x
 #' se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#'
+#' # OR_sd is per 1 SD; delta_sd only rescales the *output*, so with
+#' # delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:
+#' fit <- se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' exp(fit[["beta"]])  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
+#' # to instead report an OR of 1.5 *for* a 2-SD change, halve OR_sd on the log scale:
+#' fit2 <- se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' exp(fit2[["beta"]])  # 1.5, as intended
 se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
                        delta = NULL, delta_sd = NULL) {

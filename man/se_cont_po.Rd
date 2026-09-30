@@ -56,7 +56,10 @@ cutpoints derived from \code{p0}.}
 CI) is expressed; \code{beta}, \code{SE}, and the CI limits are all scaled by
 \code{delta} before exponentiating (the linear predictor is \code{beta * x}, so
 this rescaling is exact). At most one of \code{delta}, \code{delta_sd} may be
-supplied; defaults to 1 (raw unit of \code{x}) if neither is given.}
+supplied; defaults to 1 (raw unit of \code{x}) if neither is given. Note
+\code{delta}/\code{delta_sd} only change what change in \code{x} the \emph{output} is
+expressed over; they do not alter \code{beta}/\code{OR_sd} itself, which is
+always a per-1-unit/per-1-SD effect (see Details).}
 
 \item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
 \code{delta} so \code{sd_x} doesn't need to be multiplied in by hand; internally
@@ -73,6 +76,17 @@ Computes the standard error (and confidence interval) of the log odds
 ratio per unit of a continuous predictor \code{x} in a proportional-odds
 model, at a given total sample size \code{n}.
 }
+\details{
+\code{OR_sd} and \code{delta_sd} both reference the SD of \code{x}, but play different
+roles and are easy to conflate: \code{OR_sd} is \emph{always} the odds ratio for a
+1-SD change (it fixes \code{beta}), while \code{delta_sd} says how many SDs the
+\emph{reported} OR should span. Because the log OR is linear in \code{x}, the
+reported OR for a \code{delta_sd}-SD change is \code{OR_sd^delta_sd}, not \code{OR_sd}
+itself. For example, \code{OR_sd = 1.5} with \code{delta_sd = 2} reports an OR of
+\code{1.5^2 = 2.25} (the OR for a 2-SD change), not 1.5 (see final example
+below). To report an OR of 1.5 \emph{for} a 2-SD change, supply
+\code{OR_sd = sqrt(1.5)} together with \code{delta_sd = 2}.
+}
 \examples{
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
@@ -83,4 +97,12 @@ se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
 se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
 # equivalently, specifying the change directly in SDs of x
 se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+
+# OR_sd is per 1 SD; delta_sd only rescales the *output*, so with
+# delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:
+fit <- se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+exp(fit[["beta"]])  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
+# to instead report an OR of 1.5 *for* a 2-SD change, halve OR_sd on the log scale:
+fit2 <- se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+exp(fit2[["beta"]])  # 1.5, as intended
 }
