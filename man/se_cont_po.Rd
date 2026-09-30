@@ -14,7 +14,8 @@ se_cont_po(
   method = c("ologit", "whitehead"),
   ngrid = 15,
   conf = 0.95,
-  delta = 1
+  delta = NULL,
+  delta_sd = NULL
 )
 }
 \arguments{
@@ -51,15 +52,21 @@ cutpoints derived from \code{p0}.}
 
 \item{conf}{Confidence level for the reported interval.}
 
-\item{delta}{Number of units of \code{x} over which the OR (and its CI) is
-expressed; \code{beta}, \code{SE}, and the CI limits are all scaled by \code{delta}
-before exponentiating (the linear predictor is \code{beta * x}, so this
-rescaling is exact). Defaults to 1 (per 1 unit of \code{x}).}
+\item{delta}{Change in \code{x}, in raw units, over which the OR (and its
+CI) is expressed; \code{beta}, \code{SE}, and the CI limits are all scaled by
+\code{delta} before exponentiating (the linear predictor is \code{beta * x}, so
+this rescaling is exact). At most one of \code{delta}, \code{delta_sd} may be
+supplied; defaults to 1 (raw unit of \code{x}) if neither is given.}
+
+\item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
+\code{delta} so \code{sd_x} doesn't need to be multiplied in by hand; internally
+converted to \code{delta = delta_sd * sd_x}. At most one of \code{delta},
+\code{delta_sd} may be supplied.}
 }
 \value{
 A named numeric vector with elements \code{beta}, \code{SE}, \code{lower},
-\code{upper} (the last two on the OR scale), all expressed for a change of
-\code{delta} units of \code{x}.
+\code{upper} (the last two on the OR scale), all expressed for the change
+in \code{x} given by \code{delta}/\code{delta_sd}.
 }
 \description{
 Computes the standard error (and confidence interval) of the log odds
@@ -74,4 +81,6 @@ se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
 se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
 # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
 se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
+# equivalently, specifying the change directly in SDs of x
+se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 }

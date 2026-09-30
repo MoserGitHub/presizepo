@@ -9,10 +9,11 @@ n_precision_cont_po(
   beta = NULL,
   sd_x,
   ratio_UL,
-  delta = 1,
+  delta = NULL,
   R2 = 0,
   conf = 0.95,
   OR_sd = NULL,
+  delta_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
   n0 = 1000
@@ -27,10 +28,11 @@ be supplied.}
 \item{sd_x}{SD of the predictor \code{x}.}
 
 \item{ratio_UL}{Target ratio of the upper to lower confidence limit for
-the OR per \code{delta} units of \code{x}.}
+the OR per \code{delta}/\code{delta_sd} change in \code{x}.}
 
-\item{delta}{Number of units of \code{x} over which the OR (and its CI) is
-expressed.}
+\item{delta}{Change in \code{x}, in raw units, over which the OR (and its
+CI) is expressed. At most one of \code{delta}, \code{delta_sd} may be supplied;
+defaults to 1 (raw unit of \code{x}) if neither is given.}
 
 \item{R2}{Proportion of variance of \code{x} explained by other covariates
 (their inclusion reduces the effective information for \code{beta} by a
@@ -43,6 +45,11 @@ above the mean to the mean), given as an alternative to \code{beta} so
 \code{sd_x} and the effect size don't need to be reconciled by hand;
 internally converted to \code{beta = log(OR_sd) / sd_x}. Exactly one of
 \code{beta}, \code{OR_sd} must be supplied.}
+
+\item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
+\code{delta} so \code{sd_x} doesn't need to be multiplied in by hand; internally
+converted to \code{delta = delta_sd * sd_x}. At most one of \code{delta},
+\code{delta_sd} may be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
 \code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}, so \code{SE(beta)} reflects
@@ -62,9 +69,9 @@ change the result.}
 }
 \value{
 A list with elements \code{n}, \code{or}, \code{method}, \code{lci}, \code{uci}. \code{or},
-\code{lci}, and \code{uci} are expressed for a change of \code{delta} units of \code{x}
-(not a 1-unit change), matching the scale on which \code{ratio_UL} was
-specified.
+\code{lci}, and \code{uci} are expressed for the change in \code{x} given by
+\code{delta}/\code{delta_sd} (not a 1-raw-unit change), matching the scale on
+which \code{ratio_UL} was specified.
 }
 \description{
 Computes the total sample size \code{n} needed so that the confidence
@@ -78,4 +85,6 @@ n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whi
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
 # equivalently, specifying the effect as an OR per SD of x
 n_precision_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+# OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
+n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
 }

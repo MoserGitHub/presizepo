@@ -167,6 +167,28 @@ resolve_beta_cont <- function(beta, OR_sd, sd_x) {
   beta
 }
 
+#' Resolve delta (in raw units of x) for a continuous predictor (internal)
+#'
+#' `delta` (in raw units of `x`) and `delta_sd` (in SDs of `x`) are two
+#' ways of specifying the same change in `x`; at most one may be supplied.
+#' This converts either into the raw-unit `delta` used internally by
+#' [se_cont_po()] and [n_precision_cont_po()], defaulting to 1 (raw unit)
+#' if neither is supplied.
+#'
+#' @param delta Change in `x`, in raw units, or `NULL`.
+#' @param delta_sd Change in `x`, in SDs, or `NULL`.
+#' @param sd_x SD of the predictor `x`.
+#'
+#' @return The change in `x` in raw units (a single number).
+#' @noRd
+resolve_delta_cont <- function(delta, delta_sd, sd_x) {
+  n_specified <- sum(!is.null(delta), !is.null(delta_sd))
+  if (n_specified > 1) stop("please specify at most one of delta, delta_sd")
+  if (!is.null(delta_sd)) return(delta_sd * sd_x)
+  if (is.null(delta)) return(1)
+  delta
+}
+
 #' Standard error of the log OR per unit of a continuous predictor
 #'
 #' Computes the standard error (and confidence interval) of the log odds
@@ -197,14 +219,19 @@ resolve_beta_cont <- function(beta, OR_sd, sd_x) {
 #' @param ngrid Number of Gauss-Hermite quadrature nodes (only used for
 #'   `method = "ologit"`).
 #' @param conf Confidence level for the reported interval.
-#' @param delta Number of units of `x` over which the OR (and its CI) is
-#'   expressed; `beta`, `SE`, and the CI limits are all scaled by `delta`
-#'   before exponentiating (the linear predictor is `beta * x`, so this
-#'   rescaling is exact). Defaults to 1 (per 1 unit of `x`).
+#' @param delta Change in `x`, in raw units, over which the OR (and its
+#'   CI) is expressed; `beta`, `SE`, and the CI limits are all scaled by
+#'   `delta` before exponentiating (the linear predictor is `beta * x`, so
+#'   this rescaling is exact). At most one of `delta`, `delta_sd` may be
+#'   supplied; defaults to 1 (raw unit of `x`) if neither is given.
+#' @param delta_sd Change in `x`, in SDs of `x`, given as an alternative to
+#'   `delta` so `sd_x` doesn't need to be multiplied in by hand; internally
+#'   converted to `delta = delta_sd * sd_x`. At most one of `delta`,
+#'   `delta_sd` may be supplied.
 #'
 #' @return A named numeric vector with elements `beta`, `SE`, `lower`,
-#'   `upper` (the last two on the OR scale), all expressed for a change of
-#'   `delta` units of `x`.
+#'   `upper` (the last two on the OR scale), all expressed for the change
+#'   in `x` given by `delta`/`delta_sd`.
 #' @export
 #'
 #' @examples
@@ -215,11 +242,14 @@ resolve_beta_cont <- function(beta, OR_sd, sd_x) {
 #' se_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, n = 30, method = "whitehead")
 #' # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
 #' se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
+#' # equivalently, specifying the change directly in SDs of x
+#' se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
-                       delta = 1) {
+                       delta = NULL, delta_sd = NULL) {
   method <- match.arg(method)
   beta <- resolve_beta_cont(beta, OR_sd, sd_x)
+  delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   levels_n <- length(p0)
   th <- stats::qlogis(cumsum(p0)[-levels_n])
@@ -259,17 +289,18 @@ se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
 #'
 #' @inheritParams se_cont_po
 #' @param ratio_UL Target ratio of the upper to lower confidence limit for
-#'   the OR per `delta` units of `x`.
-#' @param delta Number of units of `x` over which the OR (and its CI) is
-#'   expressed.
+#'   the OR per `delta`/`delta_sd` change in `x`.
+#' @param delta Change in `x`, in raw units, over which the OR (and its
+#'   CI) is expressed. At most one of `delta`, `delta_sd` may be supplied;
+#'   defaults to 1 (raw unit of `x`) if neither is given.
 #' @param n0 Sample size at which the one-time reference fit is done before
 #'   rescaling; the default is large enough that further increases do not
 #'   change the result.
 #'
 #' @return A list with elements `n`, `or`, `method`, `lci`, `uci`. `or`,
-#'   `lci`, and `uci` are expressed for a change of `delta` units of `x`
-#'   (not a 1-unit change), matching the scale on which `ratio_UL` was
-#'   specified.
+#'   `lci`, and `uci` are expressed for the change in `x` given by
+#'   `delta`/`delta_sd` (not a 1-raw-unit change), matching the scale on
+#'   which `ratio_UL` was specified.
 #' @export
 #'
 #' @examples
@@ -278,11 +309,14 @@ se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
 #' n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
 #' # equivalently, specifying the effect as an OR per SD of x
 #' n_precision_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
-n_precision_cont_po <- function(p0, beta = NULL, sd_x, ratio_UL, delta = 1, R2 = 0, conf = 0.95,
-                                OR_sd = NULL, method = c("ologit", "whitehead"), ngrid = 15,
-                                n0 = 1000) {
+#' # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
+#' n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po <- function(p0, beta = NULL, sd_x, ratio_UL, delta = NULL, R2 = 0, conf = 0.95,
+                                OR_sd = NULL, delta_sd = NULL, method = c("ologit", "whitehead"),
+                                ngrid = 15, n0 = 1000) {
   method <- match.arg(method)
   beta <- resolve_beta_cont(beta, OR_sd, sd_x)
+  delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
   fit0 <- se_cont_po(p0, beta = beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
