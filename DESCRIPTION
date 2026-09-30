@@ -1,0 +1,24 @@
+Package: presizepo
+Title: Precision-Based Sample Size for Proportional Odds Models
+Version: 0.0.1
+Authors@R: c(
+    person("André", "Moser", email = "andre.moser@unibe.ch", role = c("aut", "cre"))
+  )
+Description: Precision-based (CI-width) sample size and standard error
+    calculations for the log odds ratio in a proportional-odds (ordinal
+    logistic regression) model, for either a binary group predictor or a
+    continuous predictor. Two approaches are supported: Whitehead's (1993)
+    delta-method variance approximation, and the exact weighted
+    proportional-odds MLE fit of White, Marley-Zagar, Morris, Parmar,
+    Royston & Babiker (2023) <doi:10.1177/1536867X231162228>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+    statmod,
+    stats
+Suggests:
+    MASS,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
