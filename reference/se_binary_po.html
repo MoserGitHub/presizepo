@@ -55,7 +55,7 @@ model, at a given total sample size <code>n</code>.</p>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">se_binary_po</span><span class="op">(</span></span>
-<span>  <span class="va">pc</span>,</span>
+<span>  <span class="va">p0</span>,</span>
 <span>  OR <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pe <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rr <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -70,11 +70,7 @@ model, at a given total sample size <code>n</code>.</p>
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-pc">pc<a class="anchor" aria-label="anchor" href="#arg-pc"></a></dt>
-<dd><p>Control-arm category probabilities (sum to 1).</p></dd>
-
-
-<dt id="arg-or-pe-rr">OR, pe, rr<a class="anchor" aria-label="anchor" href="#arg-or-pe-rr"></a></dt>
+<dl><dt id="arg-or-pe-rr">OR, pe, rr<a class="anchor" aria-label="anchor" href="#arg-or-pe-rr"></a></dt>
 <dd><p>Exactly one, defining the experimental arm; see
 <code>build_arm_probs()</code>.</p></dd>
 
@@ -94,6 +90,10 @@ model, at a given total sample size <code>n</code>.</p>
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
 <dd><p>Confidence level for the reported interval.</p></dd>
+
+
+<dt id="arg-pc">pc<a class="anchor" aria-label="anchor" href="#arg-pc"></a></dt>
+<dd><p>Control-arm category probabilities (sum to 1).</p></dd>
 
 </dl></div>
     <div id="value">
