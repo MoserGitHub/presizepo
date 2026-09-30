@@ -1,0 +1,132 @@
+---
+title: "Introduction to presizepo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to presizepo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(presizepo)
+```
+
+## Overview
+
+`presizepo` computes precision-based (confidence-interval width) sample
+sizes and standard errors for the log odds ratio in a proportional-odds
+(ordinal logistic regression) model. Two predictor types are supported:
+
+* a **binary** group predictor (e.g. treatment vs. control), via
+  `se_binary_po()` and `n_precision_binary_po()`;
+* a **continuous** predictor, via `se_cont_po()` and
+  `n_precision_cont_po()`.
+
+For both, two calculation methods are available via `method`:
+
+* `"whitehead"` - Whitehead's (1993) closed-form delta-method variance
+  approximation. Fast, but assumes proportional odds and can be
+  inaccurate for large effects.
+* `"ologit"` (default) - fits a weighted proportional-odds model directly
+  to the anticipated distribution and reads the standard error off the
+  observed information matrix. This is exact (no delta-method
+  approximation), following White, Marley-Zagar, Morris, Parmar, Royston
+  & Babiker (2023).
+
+The two methods nearly agree for small effects and diverge as the
+anticipated effect size grows.
+
+## Binary predictor
+
+Suppose the anticipated distribution of outcome categories in the
+control arm is:
+
+```{r}
+pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
+```
+
+and we anticipate a proportional odds ratio of 1.7 for the experimental
+arm relative to control. Instead of `OR`, the experimental-arm
+distribution can also be supplied directly via `pe`, or implied by a
+common risk ratio `rr` on the cumulative probabilities; exactly one of
+`OR`, `pe`, `rr` must be given.
+
+### Standard error at a fixed sample size
+
+`se_binary_po()` returns the standard error of the log OR, and a
+confidence interval for the OR itself, at a given total sample size `n`
+(split between arms according to the allocation ratio `r`):
+
+```{r}
+se_binary_po(pc, OR = 1.7, n = 200, method = "ologit")
+se_binary_po(pc, OR = 1.7, n = 200, method = "whitehead")
+```
+
+### Sample size for a target precision
+
+More commonly we want the sample size needed to achieve a target
+precision, expressed as the ratio of the upper to lower confidence
+limit for the OR (`ratio_UL`). `n_precision_binary_po()` computes this
+by fitting once at a large reference sample size and rescaling
+analytically (the Fisher information scales linearly with `n`):
+
+```{r}
+n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3, method = "ologit")
+```
+
+So a sample size of `r n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3)$n`
+would be needed to constrain the OR's confidence interval to a
+3-fold ratio between its limits.
+
+## Continuous predictor
+
+For a continuous predictor `x`, the anticipated outcome-category
+distribution is instead specified at `x = mean(x)` (`p0`), along with the
+log OR per unit of `x` (`beta`) and the SD of `x` (`sd_x`):
+
+```{r}
+p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, method = "ologit")
+```
+
+Here `method = "ologit"` integrates out the mixing distribution of `x`
+(assumed normal) via Gauss-Hermite quadrature (`ngrid` nodes), jointly
+estimating the cutpoints and `beta`; `"whitehead"` instead evaluates a
+closed-form variance formula at fixed cutpoints derived from `p0`.
+
+An `R2` argument allows for the predictor's effective information to be
+reduced when other covariates explain some of its variance (e.g. when
+adjusting for baseline covariates).
+
+`n_precision_cont_po()` gives the sample size for a target CI-width
+ratio, expressed for the OR per `delta` units of `x`:
+
+```{r}
+n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3,
+                     delta = 1, method = "ologit")
+```
+
+## Choosing a method
+
+`"ologit"` is the exact calculation and is the default; `"whitehead"` is
+faster and closed-form but relies on a delta-method approximation that
+can understate uncertainty for larger anticipated effects. When in
+doubt, compare both, as done above, and prefer `"ologit"` if they
+diverge meaningfully.
+
+## References
+
+Whitehead, J. (1993). Sample size calculations for ordered categorical
+data. *Statistics in Medicine*, 12(24), 2257-2271.
+
+White, I. R., Marley-Zagar, E., Morris, T. P., Parmar, M. K., Royston,
+P., & Babiker, A. (2023). A simple software-based approach to sample
+size calculation for ordinal outcomes. *Statistical Methods in Medical
+Research*. <doi:10.1177/1536867X231162228>
