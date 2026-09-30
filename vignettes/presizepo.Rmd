@@ -32,13 +32,11 @@ sizes and standard errors for the log odds ratio in a proportional-odds
 For both, two calculation methods are available via `method`:
 
 * `"whitehead"` - Whitehead's (1993) closed-form delta-method variance
-  approximation. Fast, but assumes proportional odds and can be
+  approximation. Assumes proportional odds and can be
   inaccurate for large effects.
 * `"ologit"` (default) - fits a weighted proportional-odds model directly
   to the anticipated distribution and reads the standard error off the
-  observed information matrix. This is exact (no delta-method
-  approximation), following White, Marley-Zagar, Morris, Parmar, Royston
-  & Babiker (2023).
+  observed information matrix, following White, Marley-Zagar, Morris, Parmar, Royston & Babiker (2023).
 
 The two methods nearly agree for small effects and diverge as the
 anticipated effect size grows.
@@ -113,13 +111,6 @@ n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3,
                      delta = 1, method = "ologit")
 ```
 
-## Choosing a method
-
-`"ologit"` is the exact calculation and is the default; `"whitehead"` is
-faster and closed-form but relies on a delta-method approximation that
-can understate uncertainty for larger anticipated effects. When in
-doubt, compare both, as done above, and prefer `"ologit"` if they
-diverge meaningfully.
 
 ## References
 
