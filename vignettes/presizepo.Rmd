@@ -183,7 +183,7 @@ n_sim <- 500  # number of simulations
 n_obs <- 200  # observations per simulation
 
 # Predicted SE from presizepo
-pred_se <- se_cont_po(p0, beta = beta, sd_x = sd_x, n = n_obs, method = "ologit")
+pred_se <- se_cont_po(p0, log_beta = beta, sd_x = sd_x, n = n_obs, method = "ologit")
 cat("Predicted SE (from presizepo):", pred_se[["SE"]], "\n")
 
 # Simulation: fit the model many times and collect beta estimates
