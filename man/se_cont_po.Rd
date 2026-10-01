@@ -19,7 +19,7 @@ se_cont_po(
 )
 }
 \arguments{
-\item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
+\item{p0}{Outcome category probabilities at \code{x = 0}.}
 
 \item{OR}{Log OR per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
 be supplied.}
@@ -67,8 +67,8 @@ converted to \code{delta = delta_sd * sd_x}. At most one of \code{delta},
 \code{delta_sd} may be supplied.}
 }
 \value{
-A named numeric vector with elements \code{beta}, \code{SE}, \code{lower},
-\code{upper} (the last two on the OR scale), all expressed for the change
+A named numeric vector with elements \code{se_log_OR}, \code{OR}, \code{lower_OR},
+\code{upper_OR} (the last two on the OR scale), all expressed for the change
 in \code{x} given by \code{delta}/\code{delta_sd}.
 }
 \description{

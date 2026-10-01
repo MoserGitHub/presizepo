@@ -28,9 +28,7 @@ build_arm_probs <- function(pc, OR) {
 #' model, at a given total sample size `n`.
 #'
 #' Two approaches to the SE are supported, selectable via `method`:
-#' * `"whitehead"` - Whitehead's (1993) delta-method variance approximation
-#'   (fast, closed-form; assumes proportional odds and can be inaccurate for
-#'   large effects).
+#' * `"whitehead"` - Whitehead's (1993) formula
 #' * `"ologit"` - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
 #'   (2023) fit a weighted proportional-odds model to the
 #'   anticipated distribution and use the SE from the observed information
@@ -45,8 +43,8 @@ build_arm_probs <- function(pc, OR) {
 #'   (delta-method approximation).
 #' @param conf Confidence level for the reported interval.
 #'
-#' @return A list with elements `OR`, `conf`, `SE` (of the log OR), `lower`,
-#'   `upper` (CI limits for the OR), and `method`.
+#' @return A list with elements `conf`, `se_log_OR` (of the log OR), `OR`, `lower_OR`,
+#'   `upper_OR` (CI limits for the OR), and `method`.
 #' @export
 #'
 #' @examples
@@ -82,7 +80,7 @@ se_binary_po <- function(pc, OR, n, r = 1,
     fit_alt$SE_b
   }
 
-  list(OR = exp(logOR), conf = conf, SE = se, lower = exp(logOR - z * se), upper = exp(logOR + z * se),
+  list(conf = conf, se_log_OR = se, OR = exp(logOR), lower_OR = exp(logOR - z * se), upper_OR = exp(logOR + z * se),
        method = method)
 }
 
@@ -174,7 +172,7 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' ratio per unit of a continuous predictor `x` in a proportional-odds
 #' model, at a given total sample size `n`.
 #'
-#' @param p0 Outcome category probabilities at `x = mean(x)`.
+#' @param p0 Outcome category probabilities at `x = 0`.
 #' @param OR Log OR per unit of `x`. Exactly one of `OR`, `OR_sd` must
 #'   be supplied.
 #' @param OR_sd Log OR per SD of `x`, given as an alternative to `OR` so
@@ -225,8 +223,8 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' below). To report an OR of 1.5 *for* a 2-SD change, supply
 #' `OR_sd = log(1.5) / 2` together with `delta_sd = 2`.
 #'
-#' @return A named numeric vector with elements `beta`, `SE`, `lower`,
-#'   `upper` (the last two on the OR scale), all expressed for the change
+#' @return A named numeric vector with elements `se_log_OR`, `OR`, `lower_OR`,
+#'   `upper_OR` (the last two on the OR scale), all expressed for the change
 #'   in `x` given by `delta`/`delta_sd`.
 #' @export
 #'
@@ -281,7 +279,7 @@ se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
 
   log_beta_d <- delta * log_beta_est
   se_d <- delta * se
-  c(beta = log_beta_d, SE = se_d, lower = exp(log_beta_d - z * se_d), upper = exp(log_beta_d + z * se_d))
+  c(se_log_OR = se_d, OR = exp(log_beta_d), lower_OR = exp(log_beta_d - z * se_d), upper_OR = exp(log_beta_d + z * se_d))
 }
 
 #' Sample size for a target common OR precision, continuous predictor
@@ -322,7 +320,7 @@ n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, R2 
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
   fit0 <- se_cont_po(p0, OR = log_beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
-  n <- ceiling(n0 * (fit0[["SE"]] / target_se)^2)
+  n <- ceiling(n0 * (fit0[["se_log_OR"]] / target_se)^2)
   list(n = n, or = exp(delta * log_beta), method = method,
        lci = exp(delta * (log_beta - z * target_se)), uci = exp(delta * (log_beta + z * target_se)))
 }

@@ -22,8 +22,8 @@ control arm.}
 \item{conf}{Confidence level for the reported interval.}
 }
 \value{
-A list with elements \code{OR}, \code{conf}, \code{SE} (of the log OR), \code{lower},
-\code{upper} (CI limits for the OR), and \code{method}.
+A list with elements \code{conf}, \code{se_log_OR} (of the log OR), \code{OR}, \code{lower_OR},
+\code{upper_OR} (CI limits for the OR), and \code{method}.
 }
 \description{
 Computes the standard error (and confidence interval) of the log odds
@@ -33,9 +33,7 @@ model, at a given total sample size \code{n}.
 \details{
 Two approaches to the SE are supported, selectable via \code{method}:
 \itemize{
-\item \code{"whitehead"} - Whitehead's (1993) delta-method variance approximation
-(fast, closed-form; assumes proportional odds and can be inaccurate for
-large effects).
+\item \code{"whitehead"} - Whitehead's (1993) formula
 \item \code{"ologit"} - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
 (2023) fit a weighted proportional-odds model to the
 anticipated distribution and use the SE from the observed information

@@ -20,7 +20,7 @@ n_precision_cont_po(
 )
 }
 \arguments{
-\item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
+\item{p0}{Outcome category probabilities at \code{x = 0}.}
 
 \item{OR}{Log OR per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
 be supplied.}
