@@ -39,7 +39,53 @@ For both, two calculation methods are available via `method`:
 The two methods are similar for small effects and diverge as the
 anticipated effect size grows.
 
-## Binary predictor
+`presizepo` offers two approaches for calculating the standard error of the log odds ratio.
+
+### Whitehead's (1993) Formula
+
+Whitehead (1993) originally derived his formula for **hypothesis testing** sample size calculations with specified probability of Type I error ($\alpha$) and power ($1 - \beta$). In this setting the sample size can be generally formulated as (see Julious (2004))
+
+$$n = \frac{V(z_{\alpha/2} + z_\beta)^2}{d^2},$$
+where $d$ is the anticipated effect size and $V$ is the variance of the test statistic. Whitehead (1993) showed that for a binary predictor and allocation ratio $r$ (treatment:control),
+
+$$n = \frac{3(r+1)^2(z_{\alpha/2} + z_\beta)^2}{rd^2(1 - \sum_{k} \bar{p}_k^3)},$$
+where $d$ is the anticipated log OR and $\bar{p}_k$ is the average probability for outcome category $k$ across treatment arms, weighted by allocation $$\bar{p}_k = \frac{p_{c,k} + r \cdot p_{t,k}}{1 + r}.$$ Thus, the standard error for the anticipated log OR $d$ is
+
+$$\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_{k} \bar{p}_k^3)}}.$$
+From this relationship, one can solve for the sample size needed to achieve a target confidence interval width.
+
+For a continuous predictor $x \sim N(0, \sigma_x^2)$ one can adapt Whitehead's formula to:
+
+$$\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn\sigma_x^2 (1 - \sum_{k} \bar{p}_k^3) (1 - R^2)}},$$
+
+where $(1 - R^2)$ adjusts for information loss when the predictor is correlated with other covariates in the model.
+
+**Implementation details**: For a continuous predictor, the average probabilities $\bar{p}_k$ are computed by integrating the outcome probabilities across the distribution of $x$ using a fixed quantile grid approach with 2000 points from $x \sim N(0, \sigma_x^2)$.
+
+### White et al. (2023) Method: "ologit"
+
+White et al. (2023) propose a more direct approach that avoids delta-method approximation by fitting a weighted proportional-odds model to the anticipated data distribution and extracting the standard error from the observed information matrix.
+
+For binary predictors the algorithm is:
+
+1. **Construct anticipated data**: Create a weighted frequency table from the anticipated outcome category probabilities at each treatment level (control and treatment arms).
+2. **Fit weighted proportional-odds model**: Fit a proportional odds model to this table, with weights proportional to arm size and allocation ratio.
+3. **Extract SE**: Read the standard error of the treatment coefficient ($\beta$) directly from the inverse Hessian matrix (observed information matrix).
+
+For continuous $x \sim N(0, \sigma_x^2)$ one adapts to:
+
+1. **Integrate over the predictor distribution**: Use Gauss-Hermite quadrature with $k$ nodes (default $k=15$) to approximate the mixing distribution of $x$.
+2. **Construct weighted pseudo-data**: At each quadrature node $x_j$ with weight $w_j$:
+   - Compute outcome category probabilities: $p_{k}(x_j) = \text{Pr}(Y = k | X = x_j)$
+   - Weight by: $w_{k,j} = p_k(x_j) \cdot w_j \cdot n \cdot (1 - R^2)$
+3. **Fit weighted model**: Fit a weighted proportional-odds model to the pooled pseudo-observations across all nodes and both treatment arms (if applicable).
+4. **Extract SE**: Read the standard error of the $\beta$ coefficient from the inverse Hessian.
+
+The Gauss-Hermite nodes and weights are scaled to match $x \sim N(0, \sigma_x^2)$ via the transformation: $x_j = \sqrt{2} \sigma_x \cdot n_j$, where $n_j$ are the standard Hermite nodes.
+
+## Examples
+
+### Binary predictor
 
 Suppose the anticipated distribution of outcome categories in the
 control arm is:
@@ -51,7 +97,7 @@ pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
 and we anticipate a cOR of 1.7 for the experimental
 arm relative to control.
 
-### Standard error at a fixed sample size
+#### Standard error at a fixed sample size
 
 `se_binary_po()` returns the standard error of the log cOR, and a
 confidence interval for the cOR itself, at a given total sample size `n`:
@@ -61,11 +107,12 @@ se_binary_po(pc, OR = 1.7, n = 200, method = "ologit")
 se_binary_po(pc, OR = 1.7, n = 200, method = "whitehead")
 ```
 
-### Sample size for a target precision
+#### Sample size for a target precision
 
 More commonly we want the sample size needed to achieve a target
 precision, expressed as the ratio of the upper to lower confidence
-limit for the OR (`ratio_UL`). `n_precision_binary_po()` computes this.
+limit for the OR (`ratio_UL`). `n_precision_binary_po()` computes this, here for
+`ratio_UL=3`.
 
 ```{r}
 n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3, method = "ologit")
@@ -75,11 +122,10 @@ So a sample size of `r n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3)$n`
 would be needed to constrain the cOR's confidence interval to a
 3-fold ratio between its limits.
 
-## Continuous predictor
+### Continuous predictor
 
 For a continuous predictor `x`, the anticipated outcome-category
-distribution is instead specified at `x = mean(x)` (`p0`), along with the
-log cOR per unit of `x` (`beta`) and the SD of `x` (`sd_x`):
+distribution is instead specified at `x = 0`, along with the cOR per unit of `x` (`OR`) and the SD of `x` (`sd_x`):
 
 ```{r}
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
@@ -103,15 +149,15 @@ Notice that the SE increases when `R2 = 0.3` (and correspondingly the confidence
 interval widens), reflecting the loss of information due to confounding or 
 correlation with other covariates.
 
-### Effect size parameterization: `OR` vs `OR_sd`
+#### Effect size parameterization: `OR` vs `OR_sd`
 
-The effect size can be specified in two ways (note: these are log OR values):
+The effect size can be specified in two ways:
 
-* `OR`: log OR per **raw unit** of `x`
-* `OR_sd`: log OR per **SD** of `x`
+* `OR`: cOR per **raw unit** of `x`
+* `OR_sd`: cOR per **SD** of `x`
 
 These are equivalent ways of specifying the same effect. For example, with
-`sd_x = 0.5`, a log OR per raw unit of `log(1.5)` is equivalent to a log OR
+`sd_x = 0.5`, a cOR per raw unit of `log(1.5)` is equivalent to a cOR
 per SD of `log(sqrt(1.5)`:
 
 ```{r}
@@ -122,26 +168,14 @@ se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, method = "ologit")
 se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 0.5, n = 200, method = "ologit")
 ```
 
-### Change parameterization: `delta` vs `delta_sd`
+#### Change parameterization: `delta` vs `delta_sd`
 
 Similarly, the reported change in `x` can be expressed in two ways:
 
 * `delta`: change in **raw units** of `x`
 * `delta_sd`: change in **SDs** of `x`
 
-These control only what change in `x` the *output* is expressed over; they 
-don't change the underlying effect size. For example, with `sd_x = 0.5`:
-
-```{r}
-# delta: OR for a 1-unit change in x
-se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta = 1, method = "ologit")
-
-# delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)
-se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
-```
-
-Note that the reported log ORs differ: with `delta = 0.5` we get the same
-result as `delta_sd = 1`:
+For example, with `sd_x = 0.5`:
 
 ```{r}
 # delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)
@@ -149,7 +183,9 @@ se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta = 0.5, method = "ologit")
 se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
 ```
 
-### Sample size for a target precision
+In the first example, we express the change in `x` in a raw unit increase of $0.5$. This is the same, as when we express it by a 'one SD' increase `delta_sd=1`.
+
+#### Sample size for a target precision
 
 `n_precision_cont_po()` gives the sample size for a target CI-width
 ratio, expressed for the OR per `delta` units of `x`. It supports the same
@@ -231,13 +267,16 @@ Distribution of beta estimates:
 
 ```{r, echo=FALSE}
 hist(beta_hats, breaks = 30, main = "Distribution of coefficients",
-     xlab = "Estimated beta", freq = FALSE)
+     xlab = "Estimated coefficients", freq = FALSE)
 abline(v = beta, col = "red", lwd = 2)
 abline(v = mean(beta_hats), col = "blue", lwd = 2)
-legend("topright", c("True beta", "Mean of estimates"), col = c("red", "blue"), lwd = 2)
+legend("topright", c("presizepo", "Mean of estimates"), col = c("red", "blue"), lwd = 2)
 ```
 
 ## References
+
+Julious, S.A. (2004) Tutorial in biostatistics - Sample sizes for clinical trials with Normal
+data. *Statistics in Medicine*, 23 (12). pp. 1921-1986.
 
 Whitehead, J. (1993). Sample size calculations for ordered categorical
 data. *Statistics in Medicine*, 12(24), 2257-2271.

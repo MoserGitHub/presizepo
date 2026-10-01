@@ -28,11 +28,21 @@ build_arm_probs <- function(pc, OR) {
 #' model, at a given total sample size `n`.
 #'
 #' Two approaches to the SE are supported, selectable via `method`:
-#' * `"whitehead"` - Whitehead's (1993) formula
-#' * `"ologit"` - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
+#' * `"whitehead"` - Whitehead's (1993) formula, originally derived for
+#'   hypothesis testing with Type I error \eqn{\alpha} and power \eqn{1-\beta}
+#'   via \eqn{n = (z_{\alpha/2} + z_\beta)^2 / \text{Information}}. For
+#'   precision-based calculations, the same information structure is used to
+#'   compute the standard error: \eqn{\text{SE}(\log \text{OR}) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_k \bar{p}_k^3)}}}
+#'   where \eqn{\bar{p}_k = (p_{c,k} + r \cdot p_{t,k}) / (1 + r)} is the
+#'   weighted average probability for category \eqn{k}. The denominator
+#'   \eqn{(1 - \sum_k \bar{p}_k^3)} is the information per subject from the
+#'   ordinal outcome, which measures discriminatory power and depends only on
+#'   the outcome distribution, not on \eqn{\alpha} or \eqn{\beta}.
+#' * `"ologit"` (default) - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
 #'   (2023) fit a weighted proportional-odds model to the
 #'   anticipated distribution and use the SE from the observed information
-#'   matrix. This is their "AA" variant.
+#'   matrix. This approach avoids the delta-method approximation and directly
+#'   accounts for joint estimation of intercepts and slope.
 #'
 #' @param pc Control-arm category probabilities (sum to 1).
 #' @param OR Common odds ratio (experimental vs
@@ -119,7 +129,7 @@ n_precision_binary_po <- function(pc, OR, ratio_UL, r = 1,
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z)
   fit0 <- se_binary_po(pc, OR, n = n0, r = r, method = method)
-  n <- ceiling(n0 * (fit0$SE / target_se)^2)
+  n <- ceiling(n0 * (fit0$se_log_OR / target_se)^2)
   list(n = n, conf = conf, OR = fit0$OR, method = method,
        lci_OR = exp(log(fit0$OR) - z * target_se), uci_OR = exp(log(fit0$OR) + z * target_se))
 }
@@ -181,17 +191,26 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' @param sd_x SD of the predictor `x`. `x` is assumed to be centered (mean
 #'   0) and Gaussian, `x ~ N(0, sd_x^2)`.
 #' @param n Total sample size.
+#' @param r Allocation ratio, treatment:control (default 1 for equal allocation).
+#'   Affects the effective information available for estimating the slope, just
+#'   as in the binary case.
 #' @param R2 Proportion of variance of `x` explained by other covariates
 #'   (their inclusion reduces the effective information for `beta` by a
 #'   factor of `1 - R2`).
 #' @param method `"ologit"` (default) jointly estimates the cutpoints and
-#'   `beta` by weighted MLE over `x ~ N(0, sd_x^2)`, so `SE(beta)` reflects
-#'   the full joint information matrix; the mixing distribution of `x` is
-#'   integrated out via Gauss-Hermite quadrature (`ngrid` nodes), which
-#'   converges quickly for a normal mixing distribution. `"whitehead"`
-#'   evaluates a closed-form variance formula (in the spirit of Whitehead's
-#'   1993 formula, extended here to a continuous covariate) at fixed
-#'   cutpoints derived from `p0`.
+#'   `beta` by weighted MLE over `x ~ N(0, sd_x^2)`. The algorithm integrates
+#'   the anticipated outcome probabilities over the predictor distribution
+#'   using Gauss-Hermite quadrature (with `ngrid` nodes), constructs weighted
+#'   pseudo-observations, fits a weighted proportional-odds model, and extracts
+#'   the standard error from the inverse Hessian matrix. This approach avoids
+#'   delta-method approximation and directly accounts for joint estimation of
+#'   cutpoints and slope. `"whitehead"` evaluates a closed-form variance
+#'   formula (extended from Whitehead's 1993 formula to continuous predictors):
+#'   \eqn{\text{SE}(\beta) = \sqrt{\frac{3}{n \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
+#'   where \eqn{\bar{p}_k} are outcome category probabilities averaged over the
+#'   distribution of `x` (computed via numerical integration over a 2000-point
+#'   quantile grid). The information term \eqn{(1 - \sum_k \bar{p}_k^3)} reflects
+#'   the ordinal precision of the outcome distribution.
 #' @param ngrid Number of Gauss-Hermite quadrature nodes (only used for
 #'   `method = "ologit"`).
 #' @param conf Confidence level for the reported interval.
@@ -209,6 +228,27 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #'   `delta_sd` may be supplied.
 #'
 #' @details
+#' **Calculation Methods**:
+#'
+#' * **Whitehead**: Extends Whitehead's (1993) information-based formula to
+#'   continuous predictors. The standard error is
+#'   \eqn{\text{SE}(\beta) = \sqrt{\frac{3(r+1)^2}{rn \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
+#'   where \eqn{r} is the allocation ratio (treatment:control), which reduces
+#'   effective information as it deviates from 1. The information term
+#'   \eqn{(1 - \sum_k \bar{p}_k^3)} is derived from Whitehead's hypothesis-testing
+#'   framework but applied here to precision-based calculations. Average outcome
+#'   probabilities \eqn{\bar{p}_k} are computed by numerical integration (quantile
+#'   grid method with 2000 points) over `x ~ N(0, sd_x^2)`, and \eqn{R^2} adjusts
+#'   for confounding by other covariates.
+#'
+#' * **ologit**: Fits a weighted proportional-odds model to pseudo-observations
+#'   created by: (1) evaluating outcome probabilities at Gauss-Hermite
+#'   quadrature nodes scaled to `x ~ N(0, sd_x^2)`, (2) weighting by node
+#'   weight × sample size × (1 - R2), and (3) extracting the SE of the slope
+#'   coefficient from the inverse Hessian. This approach avoids delta-method
+#'   approximation and is more accurate for large effect sizes and skewed
+#'   distributions.
+#'
 #' `x` is assumed to be centered (mean 0) and Gaussian, `x ~ N(0, sd_x^2)`;
 #' `p0` is interpreted as the outcome-category probabilities at `x = 0`.
 #'
@@ -245,10 +285,13 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' # to instead report an OR of 1.5 *for* a 2-SD change, use sqrt(1.5):
 #' fit2 <- se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 #' fit2[["OR"]]  # 1.5, as intended
-se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
+se_cont_po <- function(p0, OR = NULL, sd_x, n, r = 1, R2 = 0, OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
                        delta = NULL, delta_sd = NULL) {
   method <- match.arg(method)
+  # Store input OR/OR_sd before converting to log scale
+  OR_input <- OR
+  OR_sd_input <- OR_sd
   # Convert OR and OR_sd to log scale
   if (!is.null(OR)) OR <- log(OR)
   if (!is.null(OR_sd)) OR_sd <- log(OR_sd)
@@ -263,8 +306,7 @@ se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
     xs <- stats::qnorm((1:ngrid_wh - 0.5) / ngrid_wh) * sd_x  # quantile grid for x ~ N(0, sd_x)
     pm <- sapply(xs, function(x) diff(c(0, stats::plogis(th - log_beta * x), 1)))  # levels_n x ngrid_wh
     pmbar <- rowMeans(pm)
-    se <- sqrt(3 / (n * sd_x^2 * (1 - sum(pmbar^3)) * (1 - R2)))
-    log_beta_est <- log_beta
+    se <- sqrt(3 * (r + 1)^2 / (r * n * sd_x^2 * (1 - sum(pmbar^3)) * (1 - R2)))
   } else {
     gh <- statmod::gauss.quad(ngrid, kind = "hermite")
     xs <- sqrt(2) * sd_x * gh$nodes            # nodes rescaled to x ~ N(0, sd_x^2)
@@ -276,10 +318,9 @@ se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
     w <- as.vector(pm) * rep(wq, each = levels_n) * n * (1 - R2)
     fit <- fit_cumlogit_weighted(level_int, x_rep, w)
     se <- fit$SE_b
-    log_beta_est <- fit$b
   }
 
-  log_beta_d <- delta * log_beta_est
+  log_beta_d <- delta * log_beta
   se_d <- delta * se
   c(se_log_OR = se_d, OR = exp(log_beta_d), lower_OR = exp(log_beta_d - z * se_d), upper_OR = exp(log_beta_d + z * se_d))
 }
@@ -313,7 +354,7 @@ se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
 #' n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 #' # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
 #' n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
-n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, R2 = 0, conf = 0.95,
+n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, r = 1, R2 = 0, conf = 0.95,
                                 OR_sd = NULL, delta_sd = NULL, method = c("ologit", "whitehead"),
                                 ngrid = 15, n0 = 1000) {
   method <- match.arg(method)
@@ -324,7 +365,7 @@ n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, R2 
   delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
-  fit0 <- se_cont_po(p0, OR = log_beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
+  fit0 <- se_cont_po(p0, OR = log_beta, sd_x = sd_x, n = n0, r = r, R2 = R2, method = method, ngrid = ngrid)
   n <- ceiling(n0 * (fit0[["se_log_OR"]] / target_se)^2)
   list(n = n, OR = exp(delta * log_beta), method = method,
        lci_OR = exp(delta * (log_beta - z * target_se)), uci_OR = exp(delta * (log_beta + z * target_se)))
