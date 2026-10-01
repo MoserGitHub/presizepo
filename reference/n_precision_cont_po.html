@@ -62,7 +62,6 @@ approximation for the <code>ologit</code> method, see details.</p>
 <span>  <span class="va">sd_x</span>,</span>
 <span>  <span class="va">ratio_UL</span>,</span>
 <span>  delta <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  r <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  R2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  conf <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  OR_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -102,12 +101,6 @@ CI) is expressed. At most one of <code>delta</code>, <code>delta_sd</code> may b
 defaults to 1 (raw unit of <code>x</code>) if neither is given.</p></dd>
 
 
-<dt id="arg-r">r<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
-<dd><p>Allocation ratio, treatment:control (default 1 for equal allocation).
-Affects the effective information available for estimating the slope, just
-as in the binary case.</p></dd>
-
-
 <dt id="arg-r-">R2<a class="anchor" aria-label="anchor" href="#arg-r-"></a></dt>
 <dd><p>Proportion of variance of <code>x</code> explained by other covariates
 (their inclusion reduces the effective information for <code>beta</code> by a
@@ -134,19 +127,13 @@ converted to <code>delta = delta_sd * sd_x</code>. At most one of <code>delta</c
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p><code>"ologit"</code> (default) jointly estimates the cutpoints and
-<code>beta</code> by weighted MLE over <code>x ~ N(0, sd_x^2)</code>. The algorithm integrates
-the anticipated outcome probabilities over the predictor distribution
-using Gauss-Hermite quadrature (with <code>ngrid</code> nodes), constructs weighted
-pseudo-observations, fits a weighted proportional-odds model, and extracts
-the standard error from the inverse Hessian matrix. This approach avoids
-delta-method approximation and directly accounts for joint estimation of
-cutpoints and slope. <code>"whitehead"</code> evaluates a closed-form variance
-formula (extended from Whitehead's 1993 formula to continuous predictors):
-\(\text{SE}(\beta) = \sqrt{\frac{3}{n \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}\)
-where \(\bar{p}_k\) are outcome category probabilities averaged over the
-distribution of <code>x</code> (computed via numerical integration over a 2000-point
-quantile grid). The information term \((1 - \sum_k \bar{p}_k^3)\) reflects
-the ordinal precision of the outcome distribution.</p></dd>
+<code>beta</code> by weighted MLE over <code>x ~ N(0, sd_x^2)</code>, so <code>SE(beta)</code> reflects
+the full joint information matrix; the mixing distribution of <code>x</code> is
+integrated out via Gauss-Hermite quadrature (<code>ngrid</code> nodes), which
+converges quickly for a normal mixing distribution. <code>"whitehead"</code>
+evaluates a closed-form variance formula (in the spirit of Whitehead's
+1993 formula, extended here to a continuous covariate) at fixed
+cutpoints derived from <code>p0</code>.</p></dd>
 
 
 <dt id="arg-ngrid">ngrid<a class="anchor" aria-label="anchor" href="#arg-ngrid"></a></dt>

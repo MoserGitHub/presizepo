@@ -59,7 +59,6 @@ model, at a given total sample size <code>n</code>.</p>
 <span>  OR <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">sd_x</span>,</span>
 <span>  <span class="va">n</span>,</span>
-<span>  r <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  R2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  OR_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ologit"</span>, <span class="st">"whitehead"</span><span class="op">)</span>,</span>
@@ -92,12 +91,6 @@ be supplied.</p></dd>
 <dd><p>Total sample size.</p></dd>
 
 
-<dt id="arg-r">r<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
-<dd><p>Allocation ratio, treatment:control (default 1 for equal allocation).
-Affects the effective information available for estimating the slope, just
-as in the binary case.</p></dd>
-
-
 <dt id="arg-r-">R2<a class="anchor" aria-label="anchor" href="#arg-r-"></a></dt>
 <dd><p>Proportion of variance of <code>x</code> explained by other covariates
 (their inclusion reduces the effective information for <code>beta</code> by a
@@ -113,19 +106,13 @@ internally converted to <code>log(OR) = log(OR_sd) / sd_x</code>. Exactly one of
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p><code>"ologit"</code> (default) jointly estimates the cutpoints and
-<code>beta</code> by weighted MLE over <code>x ~ N(0, sd_x^2)</code>. The algorithm integrates
-the anticipated outcome probabilities over the predictor distribution
-using Gauss-Hermite quadrature (with <code>ngrid</code> nodes), constructs weighted
-pseudo-observations, fits a weighted proportional-odds model, and extracts
-the standard error from the inverse Hessian matrix. This approach avoids
-delta-method approximation and directly accounts for joint estimation of
-cutpoints and slope. <code>"whitehead"</code> evaluates a closed-form variance
-formula (extended from Whitehead's 1993 formula to continuous predictors):
-\(\text{SE}(\beta) = \sqrt{\frac{3}{n \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}\)
-where \(\bar{p}_k\) are outcome category probabilities averaged over the
-distribution of <code>x</code> (computed via numerical integration over a 2000-point
-quantile grid). The information term \((1 - \sum_k \bar{p}_k^3)\) reflects
-the ordinal precision of the outcome distribution.</p></dd>
+<code>beta</code> by weighted MLE over <code>x ~ N(0, sd_x^2)</code>, so <code>SE(beta)</code> reflects
+the full joint information matrix; the mixing distribution of <code>x</code> is
+integrated out via Gauss-Hermite quadrature (<code>ngrid</code> nodes), which
+converges quickly for a normal mixing distribution. <code>"whitehead"</code>
+evaluates a closed-form variance formula (in the spirit of Whitehead's
+1993 formula, extended here to a continuous covariate) at fixed
+cutpoints derived from <code>p0</code>.</p></dd>
 
 
 <dt id="arg-ngrid">ngrid<a class="anchor" aria-label="anchor" href="#arg-ngrid"></a></dt>
@@ -163,21 +150,7 @@ in <code>x</code> given by <code>delta</code>/<code>delta_sd</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p><strong>Calculation Methods</strong>:</p><ul><li><p><strong>Whitehead</strong>: Extends Whitehead's (1993) information-based formula to
-continuous predictors. The standard error is
-\(\text{SE}(\beta) = \sqrt{\frac{3(r+1)^2}{rn \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}\)
-where \(r\) is the allocation ratio (treatment:control). Average outcome
-probabilities \(\bar{p}_k\) are computed by numerical integration (quantile
-grid method with 2000 points) over <code>x ~ N(0, sd_x^2)</code>, and \(R^2\) adjusts
-for confounding by other covariates.</p></li>
-<li><p><strong>ologit</strong>: Fits a weighted proportional-odds model to pseudo-observations
-created by: (1) evaluating outcome probabilities at Gauss-Hermite
-quadrature nodes scaled to <code>x ~ N(0, sd_x^2)</code>, (2) weighting by node
-weight × sample size × (1 - R2), and (3) extracting the SE of the slope
-coefficient from the inverse Hessian. This approach avoids delta-method
-approximation and is more accurate for large effect sizes and skewed
-distributions.</p></li>
-</ul><p><code>x</code> is assumed to be centered (mean 0) and Gaussian, <code>x ~ N(0, sd_x^2)</code>;
+    <p><code>x</code> is assumed to be centered (mean 0) and Gaussian, <code>x ~ N(0, sd_x^2)</code>;
 <code>p0</code> is interpreted as the outcome-category probabilities at <code>x = 0</code>.</p>
 <p><code>OR_sd</code> and <code>delta_sd</code> both reference the SD of <code>x</code>, but play different
 roles and are easy to conflate: <code>OR_sd</code> is <em>always</em> the OR for a
@@ -198,7 +171,7 @@ below). To report an OR of 1.5 <em>for</em> a 2-SD change, supply
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.2813359  1.5000000  0.1217352 18.4827396 </span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6445034 1.5000000 0.4241202 5.3050994 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6445034 1.5000000 0.4241202 5.3050995 </span>
 <span class="r-in"><span><span class="co"># equivalently, specifying the effect as OR per SD of x</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  se_log_OR         OR   lower_OR   upper_OR </span>
