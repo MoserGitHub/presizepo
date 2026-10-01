@@ -66,8 +66,8 @@ model, at a given total sample size <code>n</code>.</p>
 
 
 <dt id="arg-or">OR<a class="anchor" aria-label="anchor" href="#arg-or"></a></dt>
-<dd><p>Proportional (cumulative) odds ratio for the experimental vs.
-control arm.</p></dd>
+<dd><p>Common odds ratio (experimental vs
+control arm).</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -79,17 +79,16 @@ control arm.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p><code>"ologit"</code> (default; exact MLE) or <code>"whitehead"</code>
-(delta-method approximation).</p></dd>
+<dd><p><code>"ologit"</code> (default) or <code>"whitehead"</code></p></dd>
 
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
-<dd><p>Confidence level for the reported interval.</p></dd>
+<dd><p>Confidence level.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with elements <code>conf</code>, <code>se_log_OR</code> (of the log OR), <code>OR</code>, <code>lower_OR</code>,
+    <p>A list with elements <code>conf</code>, <code>se_log_OR</code>, <code>OR</code>, <code>lower_OR</code>,
 <code>upper_OR</code> (CI limits for the OR), and <code>method</code>.</p>
     </div>
     <div id="details">
