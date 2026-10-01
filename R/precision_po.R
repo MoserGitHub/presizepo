@@ -121,7 +121,7 @@ n_precision_binary_po <- function(pc, OR, ratio_UL, r = 1,
   fit0 <- se_binary_po(pc, OR, n = n0, r = r, method = method)
   n <- ceiling(n0 * (fit0$SE / target_se)^2)
   list(n = n, conf = conf, OR = fit0$OR, method = method,
-       lci_or = exp(log(fit0$OR) - z * target_se), uci_or = exp(log(fit0$OR) + z * target_se))
+       lci_OR = exp(log(fit0$OR) - z * target_se), uci_OR = exp(log(fit0$OR) + z * target_se))
 }
 
 
@@ -326,8 +326,8 @@ n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, R2 
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
   fit0 <- se_cont_po(p0, OR = log_beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
   n <- ceiling(n0 * (fit0[["se_log_OR"]] / target_se)^2)
-  list(n = n, or = exp(delta * log_beta), method = method,
-       lci = exp(delta * (log_beta - z * target_se)), uci = exp(delta * (log_beta + z * target_se)))
+  list(n = n, OR = exp(delta * log_beta), method = method,
+       lci_OR = exp(delta * (log_beta - z * target_se)), uci_OR = exp(delta * (log_beta + z * target_se)))
 }
 
 
