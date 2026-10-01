@@ -213,23 +213,23 @@ for (i in seq_len(n_sim)) {
     polr(factor(y) ~ x, method = "logistic", Hess = TRUE)
   )
   
-  # Extract beta estimate (slope coefficient)
+  # Extract coeff
   beta_hats[i] <- unname(coef(fit))
 }
 
 # Empirical SE
 emp_se <- sd(beta_hats)
 cat("Empirical SE (from simulation):", emp_se, "\n")
-cat("Ratio (empirical / predicted):", emp_se / pred_se[["se_log_OR"]], "\n")
+cat("Ratio (empirical / presizepo):", emp_se / pred_se[["se_log_OR"]], "\n")
 ```
 
 The empirical SE from the simulation should closely match the predicted SE,
 validating the theoretical calculations. The ratio should be close to 1.
 
-We can also visualize the distribution of beta estimates:
+Distribution of beta estimates:
 
-```{r}
-hist(beta_hats, breaks = 30, main = "Distribution of beta estimates from simulation",
+```{r, echo=FALSE}
+hist(beta_hats, breaks = 30, main = "Distribution of coefficients",
      xlab = "Estimated beta", freq = FALSE)
 abline(v = beta, col = "red", lwd = 2)
 abline(v = mean(beta_hats), col = "blue", lwd = 2)
