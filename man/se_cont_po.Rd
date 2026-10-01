@@ -9,6 +9,7 @@ se_cont_po(
   OR = NULL,
   sd_x,
   n,
+  r = 1,
   R2 = 0,
   OR_sd = NULL,
   method = c("ologit", "whitehead"),
@@ -29,6 +30,10 @@ be supplied.}
 
 \item{n}{Total sample size.}
 
+\item{r}{Allocation ratio, treatment:control (default 1 for equal allocation).
+Affects the effective information available for estimating the slope, just
+as in the binary case.}
+
 \item{R2}{Proportion of variance of \code{x} explained by other covariates
 (their inclusion reduces the effective information for \code{beta} by a
 factor of \code{1 - R2}).}
@@ -39,13 +44,19 @@ internally converted to \code{log(OR) = log(OR_sd) / sd_x}. Exactly one of
 \code{OR}, \code{OR_sd} must be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
-\code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}, so \code{SE(beta)} reflects
-the full joint information matrix; the mixing distribution of \code{x} is
-integrated out via Gauss-Hermite quadrature (\code{ngrid} nodes), which
-converges quickly for a normal mixing distribution. \code{"whitehead"}
-evaluates a closed-form variance formula (in the spirit of Whitehead's
-1993 formula, extended here to a continuous covariate) at fixed
-cutpoints derived from \code{p0}.}
+\code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}. The algorithm integrates
+the anticipated outcome probabilities over the predictor distribution
+using Gauss-Hermite quadrature (with \code{ngrid} nodes), constructs weighted
+pseudo-observations, fits a weighted proportional-odds model, and extracts
+the standard error from the inverse Hessian matrix. This approach avoids
+delta-method approximation and directly accounts for joint estimation of
+cutpoints and slope. \code{"whitehead"} evaluates a closed-form variance
+formula (extended from Whitehead's 1993 formula to continuous predictors):
+\eqn{\text{SE}(\beta) = \sqrt{\frac{3}{n \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
+where \eqn{\bar{p}_k} are outcome category probabilities averaged over the
+distribution of \code{x} (computed via numerical integration over a 2000-point
+quantile grid). The information term \eqn{(1 - \sum_k \bar{p}_k^3)} reflects
+the ordinal precision of the outcome distribution.}
 
 \item{ngrid}{Number of Gauss-Hermite quadrature nodes (only used for
 \code{method = "ologit"}).}
@@ -77,6 +88,24 @@ ratio per unit of a continuous predictor \code{x} in a proportional-odds
 model, at a given total sample size \code{n}.
 }
 \details{
+\strong{Calculation Methods}:
+\itemize{
+\item \strong{Whitehead}: Extends Whitehead's (1993) information-based formula to
+continuous predictors. The standard error is
+\eqn{\text{SE}(\beta) = \sqrt{\frac{3(r+1)^2}{rn \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
+where \eqn{r} is the allocation ratio (treatment:control). Average outcome
+probabilities \eqn{\bar{p}_k} are computed by numerical integration (quantile
+grid method with 2000 points) over \code{x ~ N(0, sd_x^2)}, and \eqn{R^2} adjusts
+for confounding by other covariates.
+\item \strong{ologit}: Fits a weighted proportional-odds model to pseudo-observations
+created by: (1) evaluating outcome probabilities at Gauss-Hermite
+quadrature nodes scaled to \code{x ~ N(0, sd_x^2)}, (2) weighting by node
+weight × sample size × (1 - R2), and (3) extracting the SE of the slope
+coefficient from the inverse Hessian. This approach avoids delta-method
+approximation and is more accurate for large effect sizes and skewed
+distributions.
+}
+
 \code{x} is assumed to be centered (mean 0) and Gaussian, \code{x ~ N(0, sd_x^2)};
 \code{p0} is interpreted as the outcome-category probabilities at \code{x = 0}.
 

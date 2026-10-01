@@ -32,11 +32,21 @@ model, at a given total sample size \code{n}.
 \details{
 Two approaches to the SE are supported, selectable via \code{method}:
 \itemize{
-\item \code{"whitehead"} - Whitehead's (1993) formula
-\item \code{"ologit"} - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
+\item \code{"whitehead"} - Whitehead's (1993) formula, originally derived for
+hypothesis testing with Type I error \eqn{\alpha} and power \eqn{1-\beta}
+via \eqn{n = (z_{\alpha/2} + z_\beta)^2 / \text{Information}}. For
+precision-based calculations, the same information structure is used to
+compute the standard error: \eqn{\text{SE}(\log \text{OR}) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_k \bar{p}_k^3)}}}
+where \eqn{\bar{p}_k = (p_{c,k} + r \cdot p_{t,k}) / (1 + r)} is the
+weighted average probability for category \eqn{k}. The denominator
+\eqn{(1 - \sum_k \bar{p}_k^3)} is the information per subject from the
+ordinal outcome, which measures discriminatory power and depends only on
+the outcome distribution, not on \eqn{\alpha} or \eqn{\beta}.
+\item \code{"ologit"} (default) - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
 (2023) fit a weighted proportional-odds model to the
 anticipated distribution and use the SE from the observed information
-matrix. This is their "AA" variant.
+matrix. This approach avoids the delta-method approximation and directly
+accounts for joint estimation of intercepts and slope.
 }
 }
 \examples{

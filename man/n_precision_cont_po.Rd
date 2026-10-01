@@ -10,6 +10,7 @@ n_precision_cont_po(
   sd_x,
   ratio_UL,
   delta = NULL,
+  r = 1,
   R2 = 0,
   conf = 0.95,
   OR_sd = NULL,
@@ -35,6 +36,10 @@ the OR per \code{delta}/\code{delta_sd} change in \code{x}.}
 CI) is expressed. At most one of \code{delta}, \code{delta_sd} may be supplied;
 defaults to 1 (raw unit of \code{x}) if neither is given.}
 
+\item{r}{Allocation ratio, treatment:control (default 1 for equal allocation).
+Affects the effective information available for estimating the slope, just
+as in the binary case.}
+
 \item{R2}{Proportion of variance of \code{x} explained by other covariates
 (their inclusion reduces the effective information for \code{beta} by a
 factor of \code{1 - R2}).}
@@ -52,13 +57,19 @@ converted to \code{delta = delta_sd * sd_x}. At most one of \code{delta},
 \code{delta_sd} may be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
-\code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}, so \code{SE(beta)} reflects
-the full joint information matrix; the mixing distribution of \code{x} is
-integrated out via Gauss-Hermite quadrature (\code{ngrid} nodes), which
-converges quickly for a normal mixing distribution. \code{"whitehead"}
-evaluates a closed-form variance formula (in the spirit of Whitehead's
-1993 formula, extended here to a continuous covariate) at fixed
-cutpoints derived from \code{p0}.}
+\code{beta} by weighted MLE over \code{x ~ N(0, sd_x^2)}. The algorithm integrates
+the anticipated outcome probabilities over the predictor distribution
+using Gauss-Hermite quadrature (with \code{ngrid} nodes), constructs weighted
+pseudo-observations, fits a weighted proportional-odds model, and extracts
+the standard error from the inverse Hessian matrix. This approach avoids
+delta-method approximation and directly accounts for joint estimation of
+cutpoints and slope. \code{"whitehead"} evaluates a closed-form variance
+formula (extended from Whitehead's 1993 formula to continuous predictors):
+\eqn{\text{SE}(\beta) = \sqrt{\frac{3}{n \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
+where \eqn{\bar{p}_k} are outcome category probabilities averaged over the
+distribution of \code{x} (computed via numerical integration over a 2000-point
+quantile grid). The information term \eqn{(1 - \sum_k \bar{p}_k^3)} reflects
+the ordinal precision of the outcome distribution.}
 
 \item{ngrid}{Number of Gauss-Hermite quadrature nodes (only used for
 \code{method = "ologit"}).}
