@@ -84,7 +84,7 @@ se_binary_po <- function(p0, OR = NULL, p1 = NULL, rr = NULL, n, r = 1,
 
   need_fit_alt <- is.null(OR) || method == "ologit"
   if (need_fit_alt) {
-    fit_alt <- .fit_cumlogit_weighted(level_int, x, w)
+    fit_alt <- fit_cumlogit_weighted(level_int, x, w)
     # sign flipped
     logOR <- -fit_alt$b
   } else {
@@ -360,7 +360,7 @@ n_precision_cont_po <- function(p0, beta = NULL, sd_x, ratio_UL, delta = NULL, R
 #' @return A list with elements `b` (slope estimate), `SE_b` (its standard
 #'   error, `NA` if `estimate_b = FALSE`), and `zeta` (fitted cutpoints).
 #' @noRd
-.fit_cumlogit_weighted <- function(level_int, x, w, offset = rep(0, length(x)),
+fit_cumlogit_weighted <- function(level_int, x, w, offset = rep(0, length(x)),
                                    estimate_b = TRUE) {
   levels_n <- max(level_int)
   n_zeta <- levels_n - 1
