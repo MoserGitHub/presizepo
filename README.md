@@ -4,21 +4,15 @@
 # `presizepo`
 
 `presizepo` is a precision-based (confidence-interval width) sample size
-approach for the log odds ratio in a proportional-odds model, for either
-a binary or continuouse predictor
+approach for the common odds ratio from a proportional-odds model, for
+either a binary or continuouse predictor
 
 ## Installation
 
 `presizepo` can be installed via
 
 ``` r
-install.packages('presizepo', repos = c('https://dcr-unibe-ch.r-universe.dev', 'https://cloud.r-project.org'))
-```
-
-or via
-
-``` r
-remotes::install_github("dcr-unibe-ch/presizepo")
+remotes::install_github("MoserGithub/presizepo")
 ```
 
 This may require `Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")`
