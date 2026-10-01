@@ -22,7 +22,7 @@ n_precision_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = 0}.}
 
-\item{OR}{Log OR per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
+\item{OR}{Odds ratio per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
 be supplied.}
 
 \item{sd_x}{SD of the predictor \code{x}. \code{x} is assumed to be centered (mean
@@ -41,9 +41,9 @@ factor of \code{1 - R2}).}
 
 \item{conf}{Confidence level for the reported interval.}
 
-\item{OR_sd}{Log OR per SD of \code{x}, given as an alternative to \code{OR} so
+\item{OR_sd}{Odds ratio per SD of \code{x}, given as an alternative to \code{OR} so
 \code{sd_x} and the effect size don't need to be reconciled by hand;
-internally converted to \code{OR = OR_sd / sd_x}. Exactly one of
+internally converted to \code{log(OR) = log(OR_sd) / sd_x}. Exactly one of
 \code{OR}, \code{OR_sd} must be supplied.}
 
 \item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
@@ -80,10 +80,10 @@ approximation for the \code{ologit} method, see details.
 }
 \examples{
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-n_precision_cont_po(p0, OR = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
-n_precision_cont_po(p0, OR = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
-# equivalently, specifying the effect as log OR per SD of x
-n_precision_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, OR = 1.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, OR = 1.5, sd_x = 0.5, ratio_UL = 3, method = "ologit")
+# equivalently, specifying the effect as OR per SD of x
+n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
-n_precision_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
 }

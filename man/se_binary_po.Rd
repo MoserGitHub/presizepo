@@ -9,20 +9,19 @@ se_binary_po(pc, OR, n, r = 1, method = c("ologit", "whitehead"), conf = 0.95)
 \arguments{
 \item{pc}{Control-arm category probabilities (sum to 1).}
 
-\item{OR}{Proportional (cumulative) odds ratio for the experimental vs.
-control arm.}
+\item{OR}{Common odds ratio (experimental vs
+control arm).}
 
 \item{n}{Total sample size (both arms).}
 
 \item{r}{Allocation ratio, treatment:control.}
 
-\item{method}{\code{"ologit"} (default; exact MLE) or \code{"whitehead"}
-(delta-method approximation).}
+\item{method}{\code{"ologit"} (default) or \code{"whitehead"}}
 
-\item{conf}{Confidence level for the reported interval.}
+\item{conf}{Confidence level.}
 }
 \value{
-A list with elements \code{conf}, \code{se_log_OR} (of the log OR), \code{OR}, \code{lower_OR},
+A list with elements \code{conf}, \code{se_log_OR}, \code{OR}, \code{lower_OR},
 \code{upper_OR} (CI limits for the OR), and \code{method}.
 }
 \description{

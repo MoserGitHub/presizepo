@@ -21,7 +21,7 @@ se_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = 0}.}
 
-\item{OR}{Log OR per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
+\item{OR}{Odds ratio per unit of \code{x}. Exactly one of \code{OR}, \code{OR_sd} must
 be supplied.}
 
 \item{sd_x}{SD of the predictor \code{x}. \code{x} is assumed to be centered (mean
@@ -33,9 +33,9 @@ be supplied.}
 (their inclusion reduces the effective information for \code{beta} by a
 factor of \code{1 - R2}).}
 
-\item{OR_sd}{Log OR per SD of \code{x}, given as an alternative to \code{OR} so
+\item{OR_sd}{Odds ratio per SD of \code{x}, given as an alternative to \code{OR} so
 \code{sd_x} and the effect size don't need to be reconciled by hand;
-internally converted to \code{OR = OR_sd / sd_x}. Exactly one of
+internally converted to \code{log(OR) = log(OR_sd) / sd_x}. Exactly one of
 \code{OR}, \code{OR_sd} must be supplied.}
 
 \item{method}{\code{"ologit"} (default) jointly estimates the cutpoints and
@@ -81,31 +81,31 @@ model, at a given total sample size \code{n}.
 \code{p0} is interpreted as the outcome-category probabilities at \code{x = 0}.
 
 \code{OR_sd} and \code{delta_sd} both reference the SD of \code{x}, but play different
-roles and are easy to conflate: \code{OR_sd} is \emph{always} the log OR for a
+roles and are easy to conflate: \code{OR_sd} is \emph{always} the OR for a
 1-SD change (it fixes \code{OR}), while \code{delta_sd} says how many SDs the
 \emph{reported} OR should span. Because the log OR is linear in \code{x}, the
-reported log OR for a \code{delta_sd}-SD change is \code{OR_sd * delta_sd}, not \code{OR_sd}
-itself. For example, \code{OR_sd = log(1.5)} with \code{delta_sd = 2} reports a log OR of
-\code{log(1.5) * 2 = log(2.25)} (the log OR for a 2-SD change), not \code{log(1.5)} (see final example
+reported OR for a \code{delta_sd}-SD change is \code{OR_sd^delta_sd}, not \code{OR_sd}
+itself. For example, \code{OR_sd = 1.5} with \code{delta_sd = 2} reports an OR of
+\code{1.5^2 = 2.25} (the OR for a 2-SD change), not \code{1.5} (see final example
 below). To report an OR of 1.5 \emph{for} a 2-SD change, supply
-\code{OR_sd = log(1.5) / 2} together with \code{delta_sd = 2}.
+\code{OR_sd = sqrt(1.5)} together with \code{delta_sd = 2}.
 }
 \examples{
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
-# equivalently, specifying the effect as log OR per SD of x
-se_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 30, method = "whitehead")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 30, method = "ologit")
+# equivalently, specifying the effect as OR per SD of x
+se_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, n = 30, method = "whitehead")
 # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
-se_cont_po(p0, OR = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
+se_cont_po(p0, OR = 1.5, sd_x = 1, n = 30, delta = 2, method = "whitehead")
 # equivalently, specifying the change directly in SDs of x
-se_cont_po(p0, OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 
 # OR_sd is per 1 SD; delta_sd only rescales the *output*, so with
-# delta_sd = 2 the reported log OR is OR_sd*2, not OR_sd:
-fit <- se_cont_po(p0, OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
-exp(fit[["beta"]])  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
-# to instead report an OR of 1.5 *for* a 2-SD change, halve OR_sd:
-fit2 <- se_cont_po(p0, OR_sd = log(1.5) / 2, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
-exp(fit2[["beta"]])  # 1.5, as intended
+# delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:
+fit <- se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+fit[["OR"]]  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
+# to instead report an OR of 1.5 *for* a 2-SD change, use sqrt(1.5):
+fit2 <- se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+fit2[["OR"]]  # 1.5, as intended
 }

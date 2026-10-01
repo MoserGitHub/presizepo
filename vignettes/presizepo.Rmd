@@ -83,7 +83,7 @@ log cOR per unit of `x` (`beta`) and the SD of `x` (`sd_x`):
 
 ```{r}
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, method = "ologit")
 ```
 
 An `R2` argument allows for the predictor's effective information to be
@@ -93,10 +93,10 @@ adjusting for baseline covariates). For example, if other covariates explain
 
 ```{r}
 # Without adjustment for other covariates (R2 = 0)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, R2 = 0, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, R2 = 0, method = "ologit")
 
 # With other covariates explaining 30% of variance of x (R2 = 0.3)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, R2 = 0.3, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, R2 = 0.3, method = "ologit")
 ```
 
 Notice that the SE increases when `R2 = 0.3` (and correspondingly the confidence 
@@ -112,14 +112,14 @@ The effect size can be specified in two ways (note: these are log OR values):
 
 These are equivalent ways of specifying the same effect. For example, with
 `sd_x = 0.5`, a log OR per raw unit of `log(1.5)` is equivalent to a log OR
-per SD of `log(1.5) * 0.5`:
+per SD of `log(sqrt(1.5)`:
 
 ```{r}
 # OR: log OR per raw unit
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, method = "ologit")
 
 # OR_sd: log OR per SD (equivalent when sd_x = 0.5)
-se_cont_po(p0, OR_sd = log(1.5) * 0.5, sd_x = 0.5, n = 200, method = "ologit")
+se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 0.5, n = 200, method = "ologit")
 ```
 
 ### Change parameterization: `delta` vs `delta_sd`
@@ -134,10 +134,10 @@ don't change the underlying effect size. For example, with `sd_x = 0.5`:
 
 ```{r}
 # delta: OR for a 1-unit change in x
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, delta = 1, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta = 1, method = "ologit")
 
 # delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
 ```
 
 Note that the reported log ORs differ: with `delta = 0.5` we get the same
@@ -145,8 +145,8 @@ result as `delta_sd = 1`:
 
 ```{r}
 # delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, delta = 0.5, method = "ologit")
-se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta = 0.5, method = "ologit")
+se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
 ```
 
 ### Sample size for a target precision
@@ -157,11 +157,11 @@ ratio, expressed for the OR per `delta` units of `x`. It supports the same
 
 ```{r}
 # Using OR and delta
-n_precision_cont_po(p0, OR = log(1.5), sd_x = 0.5, ratio_UL = 3,
+n_precision_cont_po(p0, OR = 1.5, sd_x = 0.5, ratio_UL = 3,
                      delta = 1, method = "ologit")
 
 # Using OR_sd and delta_sd (specifying effect and change per SD)
-n_precision_cont_po(p0, OR_sd = log(1.5) * 0.5, sd_x = 0.5, ratio_UL = 3,
+n_precision_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 0.5, ratio_UL = 3,
                      delta_sd = 1, method = "ologit")
 ```
 
@@ -177,13 +177,14 @@ library(MASS)
 # Set up simulation parameters
 set.seed(1234)
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-beta <- log(1.5)
+OR <- 1.5  # odds ratio per unit of x
+beta <- log(OR)  # log OR for data generation
 sd_x <- 0.5
 n_sim <- 500  # number of simulations
 n_obs <- 200  # observations per simulation
 
 # Predicted SE from presizepo
-pred_se <- se_cont_po(p0, OR = beta, sd_x = sd_x, n = n_obs, method = "ologit")
+pred_se <- se_cont_po(p0, OR = OR, sd_x = sd_x, n = n_obs, method = "ologit")
 cat("Predicted SE (from presizepo):", pred_se[["se_log_OR"]], "\n")
 
 # Simulation: fit the model many times and collect beta estimates

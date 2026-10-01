@@ -172,11 +172,11 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' model, at a given total sample size `n`.
 #'
 #' @param p0 Outcome category probabilities at `x = 0`.
-#' @param OR Log OR per unit of `x`. Exactly one of `OR`, `OR_sd` must
+#' @param OR Odds ratio per unit of `x`. Exactly one of `OR`, `OR_sd` must
 #'   be supplied.
-#' @param OR_sd Log OR per SD of `x`, given as an alternative to `OR` so
+#' @param OR_sd Odds ratio per SD of `x`, given as an alternative to `OR` so
 #'   `sd_x` and the effect size don't need to be reconciled by hand;
-#'   internally converted to `OR = OR_sd / sd_x`. Exactly one of
+#'   internally converted to `log(OR) = log(OR_sd) / sd_x`. Exactly one of
 #'   `OR`, `OR_sd` must be supplied.
 #' @param sd_x SD of the predictor `x`. `x` is assumed to be centered (mean
 #'   0) and Gaussian, `x ~ N(0, sd_x^2)`.
@@ -213,14 +213,14 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' `p0` is interpreted as the outcome-category probabilities at `x = 0`.
 #'
 #' `OR_sd` and `delta_sd` both reference the SD of `x`, but play different
-#' roles and are easy to conflate: `OR_sd` is *always* the log OR for a
+#' roles and are easy to conflate: `OR_sd` is *always* the OR for a
 #' 1-SD change (it fixes `OR`), while `delta_sd` says how many SDs the
 #' *reported* OR should span. Because the log OR is linear in `x`, the
-#' reported log OR for a `delta_sd`-SD change is `OR_sd * delta_sd`, not `OR_sd`
-#' itself. For example, `OR_sd = log(1.5)` with `delta_sd = 2` reports a log OR of
-#' `log(1.5) * 2 = log(2.25)` (the log OR for a 2-SD change), not `log(1.5)` (see final example
+#' reported OR for a `delta_sd`-SD change is `OR_sd^delta_sd`, not `OR_sd`
+#' itself. For example, `OR_sd = 1.5` with `delta_sd = 2` reports an OR of
+#' `1.5^2 = 2.25` (the OR for a 2-SD change), not `1.5` (see final example
 #' below). To report an OR of 1.5 *for* a 2-SD change, supply
-#' `OR_sd = log(1.5) / 2` together with `delta_sd = 2`.
+#' `OR_sd = sqrt(1.5)` together with `delta_sd = 2`.
 #'
 #' @return A named numeric vector with elements `se_log_OR`, `OR`, `lower_OR`,
 #'   `upper_OR` (the last two on the OR scale), all expressed for the change
@@ -229,26 +229,29 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #'
 #' @examples
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-#' se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
-#' se_cont_po(p0, OR = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
-#' # equivalently, specifying the effect as log OR per SD of x
-#' se_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
+#' se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 30, method = "whitehead")
+#' se_cont_po(p0, OR = 1.5, sd_x = 0.5, n = 30, method = "ologit")
+#' # equivalently, specifying the effect as OR per SD of x
+#' se_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, n = 30, method = "whitehead")
 #' # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
-#' se_cont_po(p0, OR = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
+#' se_cont_po(p0, OR = 1.5, sd_x = 1, n = 30, delta = 2, method = "whitehead")
 #' # equivalently, specifying the change directly in SDs of x
-#' se_cont_po(p0, OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 #'
 #' # OR_sd is per 1 SD; delta_sd only rescales the *output*, so with
-#' # delta_sd = 2 the reported log OR is OR_sd*2, not OR_sd:
-#' fit <- se_cont_po(p0, OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
-#' exp(fit[["beta"]])  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
-#' # to instead report an OR of 1.5 *for* a 2-SD change, halve OR_sd:
-#' fit2 <- se_cont_po(p0, OR_sd = log(1.5) / 2, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
-#' exp(fit2[["beta"]])  # 1.5, as intended
+#' # delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:
+#' fit <- se_cont_po(p0, OR_sd = 1.5, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' fit[["OR"]]  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
+#' # to instead report an OR of 1.5 *for* a 2-SD change, use sqrt(1.5):
+#' fit2 <- se_cont_po(p0, OR_sd = sqrt(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' fit2[["OR"]]  # 1.5, as intended
 se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
                        delta = NULL, delta_sd = NULL) {
   method <- match.arg(method)
+  # Convert OR and OR_sd to log scale
+  if (!is.null(OR)) OR <- log(OR)
+  if (!is.null(OR_sd)) OR_sd <- log(OR_sd)
   log_beta <- resolve_beta_cont(OR, OR_sd, sd_x)
   delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
@@ -304,16 +307,19 @@ se_cont_po <- function(p0, OR = NULL, sd_x, n, R2 = 0, OR_sd = NULL,
 #'
 #' @examples
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-#' n_precision_cont_po(p0, OR = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
-#' n_precision_cont_po(p0, OR = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
-#' # equivalently, specifying the effect as log OR per SD of x
-#' n_precision_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+#' n_precision_cont_po(p0, OR = 1.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+#' n_precision_cont_po(p0, OR = 1.5, sd_x = 0.5, ratio_UL = 3, method = "ologit")
+#' # equivalently, specifying the effect as OR per SD of x
+#' n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 #' # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
-#' n_precision_cont_po(p0, OR_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+#' n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
 n_precision_cont_po <- function(p0, OR = NULL, sd_x, ratio_UL, delta = NULL, R2 = 0, conf = 0.95,
                                 OR_sd = NULL, delta_sd = NULL, method = c("ologit", "whitehead"),
                                 ngrid = 15, n0 = 1000) {
   method <- match.arg(method)
+  # Convert OR and OR_sd to log scale
+  if (!is.null(OR)) OR <- log(OR)
+  if (!is.null(OR_sd)) OR_sd <- log(OR_sd)
   log_beta <- resolve_beta_cont(OR, OR_sd, sd_x)
   delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
