@@ -89,14 +89,12 @@ control arm.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with elements <code>OR</code>, <code>conf</code>, <code>SE</code> (of the log OR), <code>lower</code>,
-<code>upper</code> (CI limits for the OR), and <code>method</code>.</p>
+    <p>A list with elements <code>conf</code>, <code>se_log_OR</code> (of the log OR), <code>OR</code>, <code>lower_OR</code>,
+<code>upper_OR</code> (CI limits for the OR), and <code>method</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Two approaches to the SE are supported, selectable via <code>method</code>:</p><ul><li><p><code>"whitehead"</code> - Whitehead's (1993) delta-method variance approximation
-(fast, closed-form; assumes proportional odds and can be inaccurate for
-large effects).</p></li>
+    <p>Two approaches to the SE are supported, selectable via <code>method</code>:</p><ul><li><p><code>"whitehead"</code> - Whitehead's (1993) formula</p></li>
 <li><p><code>"ologit"</code> - White, Marley-Zagar, Morris, Parmar, Royston &amp; Babiker
 (2023) fit a weighted proportional-odds model to the
 anticipated distribution and use the SE from the observed information
@@ -107,38 +105,38 @@ matrix. This is their "AA" variant.</p></li>
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.15</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.45</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">se_binary_po</span><span class="op">(</span><span class="va">pc</span>, OR <span class="op">=</span> <span class="fl">1.7</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $OR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $conf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $SE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $se_log_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6557662</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lower_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4701752</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $upper_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6.146645</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "whitehead"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">se_binary_po</span><span class="op">(</span><span class="va">pc</span>, OR <span class="op">=</span> <span class="fl">1.7</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $OR</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $conf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $SE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $se_log_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6613742</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $OR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $lower_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4650356</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $upper_OR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6.214578</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
