@@ -20,25 +20,23 @@ library(presizepo)
 
 ## Overview
 
-`presizepo` computes precision-based (confidence-interval width) sample
-sizes and standard errors for the log odds ratio from a proportional-odds
-(ordinal logistic regression) model. Two predictor types are supported:
+`presizepo` is precision-based (confidence-interval width) sample
+size calculation approach for the log common odds ratio (cOR) from a proportional-odds 
+model. Two predictor types are supported:
 
-* a **binary** group predictor (e.g. treatment vs. control), via
+* a **binary** predictor (e.g. treatment vs control), via
   `se_binary_po()` and `n_precision_binary_po()`;
 * a **continuous** predictor, via `se_cont_po()` and
   `n_precision_cont_po()`.
 
 For both, two calculation methods are available via `method`:
 
-* `"whitehead"` - Whitehead's (1993) closed-form delta-method variance
-  approximation. Assumes proportional odds and can be
-  inaccurate for large effects.
+* `"whitehead"` - Whitehead's (1993) formula.
 * `"ologit"` (default) - fits a weighted proportional-odds model directly
   to the anticipated distribution and reads the standard error off the
   observed information matrix, following White, Marley-Zagar, Morris, Parmar, Royston & Babiker (2023).
 
-The two methods nearly agree for small effects and diverge as the
+The two methods are similar for small effects and diverge as the
 anticipated effect size grows.
 
 ## Binary predictor
@@ -50,17 +48,13 @@ control arm is:
 pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
 ```
 
-and we anticipate a proportional odds ratio of 1.7 for the experimental
-arm relative to control. Instead of `OR`, the experimental-arm
-distribution can also be supplied directly via `pe`, or implied by a
-common risk ratio `rr` on the cumulative probabilities; exactly one of
-`OR`, `pe`, `rr` must be given.
+and we anticipate a cOR of 1.7 for the experimental
+arm relative to control.
 
 ### Standard error at a fixed sample size
 
-`se_binary_po()` returns the standard error of the log OR, and a
-confidence interval for the OR itself, at a given total sample size `n`
-(split between arms according to the allocation ratio `r`):
+`se_binary_po()` returns the standard error of the log cOR, and a
+confidence interval for the cOR itself, at a given total sample size `n`:
 
 ```{r}
 se_binary_po(pc, OR = 1.7, n = 200, method = "ologit")
@@ -71,47 +65,53 @@ se_binary_po(pc, OR = 1.7, n = 200, method = "whitehead")
 
 More commonly we want the sample size needed to achieve a target
 precision, expressed as the ratio of the upper to lower confidence
-limit for the OR (`ratio_UL`). `n_precision_binary_po()` computes this
-by fitting once at a large reference sample size and rescaling
-analytically (the Fisher information scales linearly with `n`):
+limit for the OR (`ratio_UL`). `n_precision_binary_po()` computes this.
 
 ```{r}
 n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3, method = "ologit")
 ```
 
 So a sample size of `r n_precision_binary_po(pc, OR = 1.7, ratio_UL = 3)$n`
-would be needed to constrain the OR's confidence interval to a
+would be needed to constrain the cOR's confidence interval to a
 3-fold ratio between its limits.
 
 ## Continuous predictor
 
 For a continuous predictor `x`, the anticipated outcome-category
 distribution is instead specified at `x = mean(x)` (`p0`), along with the
-log OR per unit of `x` (`beta`) and the SD of `x` (`sd_x`):
+log cOR per unit of `x` (`beta`) and the SD of `x` (`sd_x`):
 
 ```{r}
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, method = "ologit")
 ```
 
-Here `method = "ologit"` integrates out the mixing distribution of `x`
-(assumed normal) via Gauss-Hermite quadrature (`ngrid` nodes), jointly
-estimating the cutpoints and `beta`; `"whitehead"` instead evaluates a
-closed-form variance formula at fixed cutpoints derived from `p0`.
-
 An `R2` argument allows for the predictor's effective information to be
 reduced when other covariates explain some of its variance (e.g. when
-adjusting for baseline covariates).
+adjusting for baseline covariates). For example, if other covariates explain
+30% of the variance of `x`, set `R2 = 0.3`:
+
+```{r}
+# Without adjustment for other covariates (R2 = 0)
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, R2 = 0, method = "ologit")
+
+# With other covariates explaining 30% of variance of x (R2 = 0.3)
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, R2 = 0.3, method = "ologit")
+```
+
+Notice that the SE increases when `R2 = 0.3` (and correspondingly the confidence 
+interval widens), reflecting the loss of information due to confounding or 
+correlation with other covariates.
 
 ### Effect size parameterization: `beta` vs `beta_sd`
 
 The effect size can be specified in two ways:
 
-* `beta`: log OR per **raw unit** of `x`
-* `beta_sd`: log OR per **SD** of `x`
+* `beta`: log cOR per **raw unit** of `x`
+* `beta_sd`: log cOR per **SD** of `x`
 
 These are equivalent ways of specifying the same effect. For example, with
-`sd_x = 0.5`, a log OR per raw unit of `log(1.5)` is equivalent to a log OR
+`sd_x = 0.5`, a log cOR per raw unit of `log(1.5)` is equivalent to a log OcR
 per SD of `log(1.5) * 0.5`:
 
 ```{r}
@@ -195,12 +195,12 @@ for (i in seq_len(n_sim)) {
   x <- rnorm(n_obs, mean = 0, sd = sd_x)
   
   # Generate ordinal outcome from proportional-odds model
-  # Compute cumulative probabilities: P(Y <= k) for k = 0, ..., K-2
+  # Compute cumulative probabilities: P(Y <= k)
   cutpoints <- qlogis(cumsum(p0)[-length(p0)])
   eta <- beta * x
-  p_cumulative <- plogis(outer(cutpoints, eta, "-"))  # (K-1) x n matrix
+  p_cumulative <- plogis(outer(cutpoints, eta, "-"))
   
-  # Convert to category probabilities: P(Y = k) for k = 1, ..., K
+  # Convert to category probabilities: P(Y = k)
   p_cat <- rbind(p_cumulative[1, ], 
                  diff(p_cumulative, margin = 1),
                  1 - p_cumulative[nrow(p_cumulative), ])
