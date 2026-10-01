@@ -35,15 +35,14 @@ build_arm_probs <- function(pc, OR) {
 #'   matrix. This is their "AA" variant.
 #'
 #' @param pc Control-arm category probabilities (sum to 1).
-#' @param OR Proportional (cumulative) odds ratio for the experimental vs.
-#'   control arm.
+#' @param OR Common odds ratio (experimental vs
+#'   control arm).
 #' @param n Total sample size (both arms).
 #' @param r Allocation ratio, treatment:control.
-#' @param method `"ologit"` (default; exact MLE) or `"whitehead"`
-#'   (delta-method approximation).
-#' @param conf Confidence level for the reported interval.
+#' @param method `"ologit"` (default) or `"whitehead"`
+#' @param conf Confidence level.
 #'
-#' @return A list with elements `conf`, `se_log_OR` (of the log OR), `OR`, `lower_OR`,
+#' @return A list with elements `conf`, `se_log_OR`, `OR`, `lower_OR`,
 #'   `upper_OR` (CI limits for the OR), and `method`.
 #' @export
 #'

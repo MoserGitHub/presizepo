@@ -184,7 +184,7 @@ n_obs <- 200  # observations per simulation
 
 # Predicted SE from presizepo
 pred_se <- se_cont_po(p0, OR = beta, sd_x = sd_x, n = n_obs, method = "ologit")
-cat("Predicted SE (from presizepo):", pred_se[["SE"]], "\n")
+cat("Predicted SE (from presizepo):", pred_se[["se_log_OR"]], "\n")
 
 # Simulation: fit the model many times and collect beta estimates
 set.seed(1234)
@@ -220,7 +220,7 @@ for (i in seq_len(n_sim)) {
 # Empirical SE
 emp_se <- sd(beta_hats)
 cat("Empirical SE (from simulation):", emp_se, "\n")
-cat("Ratio (empirical / predicted):", emp_se / pred_se[["SE"]], "\n")
+cat("Ratio (empirical / predicted):", emp_se / pred_se[["se_log_OR"]], "\n")
 ```
 
 The empirical SE from the simulation should closely match the predicted SE,
