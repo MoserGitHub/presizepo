@@ -233,10 +233,7 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' * **Whitehead**: Extends Whitehead's (1993) information-based formula to
 #'   continuous predictors. The standard error is
 #'   \eqn{\text{SE}(\beta) = \sqrt{\frac{3(r+1)^2}{rn \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
-#'   where \eqn{r} is the allocation ratio (treatment:control), which reduces
-#'   effective information as it deviates from 1. The information term
-#'   \eqn{(1 - \sum_k \bar{p}_k^3)} is derived from Whitehead's hypothesis-testing
-#'   framework but applied here to precision-based calculations. Average outcome
+#'   where \eqn{r} is the allocation ratio (treatment:control). Average outcome
 #'   probabilities \eqn{\bar{p}_k} are computed by numerical integration (quantile
 #'   grid method with 2000 points) over `x ~ N(0, sd_x^2)`, and \eqn{R^2} adjusts
 #'   for confounding by other covariates.
