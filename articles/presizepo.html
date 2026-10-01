@@ -193,7 +193,7 @@ unit of <code>x</code> (<code>beta</code>) and the SD of <code>x</code>
 (<code>sd_x</code>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span></code></pre></div>
 <p>An <code>R2</code> argument allows for the predictor’s effective
@@ -203,29 +203,30 @@ other covariates explain 30% of the variance of <code>x</code>, set
 <code>R2 = 0.3</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Without adjustment for other covariates (R2 = 0)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
 <span></span>
 <span><span class="co"># With other covariates explaining 30% of variance of x (R2 = 0.3)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0.3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0.3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054649 0.2983471 0.8358679 2.6918117</span></span></code></pre></div>
 <p>Notice that the SE increases when <code>R2 = 0.3</code> (and
 correspondingly the confidence interval widens), reflecting the loss of
 information due to confounding or correlation with other covariates.</p>
 <div class="section level3">
-<h3 id="effect-size-parameterization-log_beta-vs-log_or_sd">Effect size parameterization: <code>log_beta</code> vs
-<code>log_OR_sd</code><a class="anchor" aria-label="anchor" href="#effect-size-parameterization-log_beta-vs-log_or_sd"></a>
+<h3 id="effect-size-parameterization-or-vs-or_sd">Effect size parameterization: <code>OR</code> vs
+<code>OR_sd</code><a class="anchor" aria-label="anchor" href="#effect-size-parameterization-or-vs-or_sd"></a>
 </h3>
-<p>The effect size can be specified in two ways:</p>
+<p>The effect size can be specified in two ways (note: these are log OR
+values):</p>
 <ul>
 <li>
-<code>log_beta</code>: log OR per <strong>raw unit</strong> of
+<code>OR</code>: log OR per <strong>raw unit</strong> of
 <code>x</code>
 </li>
 <li>
-<code>log_OR_sd</code>: log OR per <strong>SD</strong> of
+<code>OR_sd</code>: log OR per <strong>SD</strong> of
 <code>x</code>
 </li>
 </ul>
@@ -234,13 +235,13 @@ with <code>sd_x = 0.5</code>, a log OR per raw unit of
 <code>log(1.5)</code> is equivalent to a log OR per SD of
 <code>log(1.5) * 0.5</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># log_beta: log OR per raw unit</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># OR: log OR per raw unit</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
 <span></span>
-<span><span class="co"># log_OR_sd: log OR per SD (equivalent when sd_x = 0.5)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co"># OR_sd: log OR per SD (equivalent when sd_x = 0.5)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span></code></pre></div>
 </div>
@@ -265,22 +266,22 @@ is expressed over; they don’t change the underlying effect size. For
 example, with <code>sd_x = 0.5</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># delta: OR for a 1-unit change in x</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
 <span></span>
 <span><span class="co"># delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span></code></pre></div>
 <p>Note that the reported log ORs differ: with <code>delta = 0.5</code>
 we get the same result as <code>delta_sd = 1</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">0.5</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">0.5</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span></code></pre></div>
 </div>
@@ -289,12 +290,11 @@ we get the same result as <code>delta_sd = 1</code>:</p>
 </h3>
 <p><code><a href="../reference/n_precision_cont_po.html">n_precision_cont_po()</a></code> gives the sample size for a target
 CI-width ratio, expressed for the OR per <code>delta</code> units of
-<code>x</code>. It supports the same
-<code>log_beta</code>/<code>log_OR_sd</code> and
-<code>delta</code>/<code>delta_sd</code> options:</p>
+<code>x</code>. It supports the same <code>OR</code>/<code>OR_sd</code>
+and <code>delta</code>/<code>delta_sd</code> options:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Using log_beta and delta</span></span>
-<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Using OR and delta</span></span>
+<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                     delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $n</span></span>
 <span><span class="co">#&gt; [1] 159</span></span>
@@ -311,8 +311,8 @@ CI-width ratio, expressed for the OR per <code>delta</code> units of
 <span><span class="co">#&gt; $uci</span></span>
 <span><span class="co">#&gt; [1] 2.598076</span></span>
 <span></span>
-<span><span class="co"># Using log_OR_sd and delta_sd (specifying effect and change per SD)</span></span>
-<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
+<span><span class="co"># Using OR_sd and delta_sd (specifying effect and change per SD)</span></span>
+<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                     delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $n</span></span>
 <span><span class="co">#&gt; [1] 40</span></span>
@@ -349,7 +349,7 @@ the empirical standard error with the one predicted by
 <span><span class="va">n_obs</span> <span class="op">&lt;-</span> <span class="fl">200</span>  <span class="co"># observations per simulation</span></span>
 <span></span>
 <span><span class="co"># Predicted SE from presizepo</span></span>
-<span><span class="va">pred_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, log_beta <span class="op">=</span> <span class="va">beta</span>, sd_x <span class="op">=</span> <span class="va">sd_x</span>, n <span class="op">=</span> <span class="va">n_obs</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="va">pred_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="va">beta</span>, sd_x <span class="op">=</span> <span class="va">sd_x</span>, n <span class="op">=</span> <span class="va">n_obs</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Predicted SE (from presizepo):"</span>, <span class="va">pred_se</span><span class="op">[[</span><span class="st">"SE"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Predicted SE (from presizepo): 0.2496151</span></span>
 <span></span>
