@@ -99,19 +99,144 @@ Marley-Zagar, Morris, Parmar, Royston &amp; Babiker (2023).</li>
 </ul>
 <p>The two methods are similar for small effects and diverge as the
 anticipated effect size grows.</p>
+<p><code>presizepo</code> offers two approaches for calculating the
+standard error of the log odds ratio.</p>
+<div class="section level3">
+<h3 id="whiteheads-1993-formula">Whitehead’s (1993) Formula<a class="anchor" aria-label="anchor" href="#whiteheads-1993-formula"></a>
+</h3>
+<p>Whitehead (1993) originally derived his formula for
+<strong>hypothesis testing</strong> sample size calculations with
+specified probability of Type I error
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>)
+and power
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">1 - \beta</annotation></semantics></math>).
+In this setting the sample size can be generally formulated as (see
+Julious (2004))</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mfrac><mrow><mi>V</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>α</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>z</mi><mi>β</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><msup><mi>d</mi><mn>2</mn></msup></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">n = \frac{V(z_{\alpha/2} + z_\beta)^2}{d^2},</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+is the anticipated effect size and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>
+is the variance of the test statistic. Whitehead (1993) showed that for
+a binary predictor and allocation ratio
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+(treatment:control),</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mfrac><mrow><mn>3</mn><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>+</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>α</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>z</mi><mi>β</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>r</mi><msup><mi>d</mi><mn>2</mn></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msubsup><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi><mn>3</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">n = \frac{3(r+1)^2(z_{\alpha/2} + z_\beta)^2}{rd^2(1 - \sum_{k} \bar{p}_k^3)},</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+is the anticipated log OR and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi></msub><annotation encoding="application/x-tex">\bar{p}_k</annotation></semantics></math>
+is the average probability for outcome category
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+across treatment arms, weighted by allocation
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>p</mi><mrow><mi>c</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>+</mo><mi>r</mi><mo>⋅</mo><msub><mi>p</mi><mrow><mi>t</mi><mo>,</mo><mi>k</mi></mrow></msub></mrow><mrow><mn>1</mn><mo>+</mo><mi>r</mi></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">\bar{p}_k = \frac{p_{c,k} + r \cdot p_{t,k}}{1 + r}.</annotation></semantics></math>
+Thus, the standard error for the anticipated log OR
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">SE</mtext><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mfrac><mrow><mn>3</mn><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>+</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>r</mi><mi>n</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msubsup><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi><mn>3</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></msqrt><mi>.</mi></mrow><annotation encoding="application/x-tex">\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_{k} \bar{p}_k^3)}}.</annotation></semantics></math>
+From this relationship, one can solve for the sample size needed to
+achieve a target confidence interval width.</p>
+<p>For a continuous predictor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>
+one can adapt Whitehead’s formula to:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">SE</mtext><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mfrac><mrow><mn>3</mn><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>+</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>r</mi><mi>n</mi><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msubsup><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi><mn>3</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>R</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></msqrt><mo>,</mo></mrow><annotation encoding="application/x-tex">\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn\sigma_x^2 (1 - \sum_{k} \bar{p}_k^3) (1 - R^2)}},</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>R</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1 - R^2)</annotation></semantics></math>
+adjusts for information loss when the predictor is correlated with other
+covariates in the model.</p>
+<p><strong>Implementation details</strong>: For a continuous predictor,
+the average probabilities
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi></msub><annotation encoding="application/x-tex">\bar{p}_k</annotation></semantics></math>
+are computed by integrating the outcome probabilities across the
+distribution of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+using a fixed quantile grid approach with 2000 points from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>.</p>
+</div>
+<div class="section level3">
+<h3 id="white-et-al--2023-method-ologit">White et al. (2023) Method: “ologit”<a class="anchor" aria-label="anchor" href="#white-et-al--2023-method-ologit"></a>
+</h3>
+<p>White et al. (2023) propose a more direct approach that avoids
+delta-method approximation by fitting a weighted proportional-odds model
+to the anticipated data distribution and extracting the standard error
+from the observed information matrix.</p>
+<p>For binary predictors the algorithm is:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Construct anticipated data</strong>: Create a weighted
+frequency table from the anticipated outcome category probabilities at
+each treatment level (control and treatment arms).</li>
+<li>
+<strong>Fit weighted proportional-odds model</strong>: Fit a
+proportional odds model to this table, with weights proportional to arm
+size and allocation ratio.</li>
+<li>
+<strong>Extract SE</strong>: Read the standard error of the
+treatment coefficient
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>)
+directly from the inverse Hessian matrix (observed information
+matrix).</li>
+</ol>
+<p>For continuous
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>
+one adapts to:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Integrate over the predictor distribution</strong>: Use
+Gauss-Hermite quadrature with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+nodes (default
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>15</mn></mrow><annotation encoding="application/x-tex">k=15</annotation></semantics></math>)
+to approximate the mixing distribution of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>.</li>
+<li>
+<strong>Construct weighted pseudo-data</strong>: At each quadrature
+node
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>j</mi></msub><annotation encoding="application/x-tex">x_j</annotation></semantics></math>
+with weight
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mi>j</mi></msub><annotation encoding="application/x-tex">w_j</annotation></semantics></math>:
+<ul>
+<li>Compute outcome category probabilities:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mtext mathvariant="normal">Pr</mtext><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mi>k</mi><mo stretchy="false" form="prefix">|</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">p_{k}(x_j) = \text{Pr}(Y = k | X = x_j)</annotation></semantics></math>
+</li>
+<li>Weight by:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>p</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><msub><mi>w</mi><mi>j</mi></msub><mo>⋅</mo><mi>n</mi><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>R</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">w_{k,j} = p_k(x_j) \cdot w_j \cdot n \cdot (1 - R^2)</annotation></semantics></math>
+</li>
+</ul>
+</li>
+<li>
+<strong>Fit weighted model</strong>: Fit a weighted
+proportional-odds model to the pooled pseudo-observations across all
+nodes and both treatment arms (if applicable).</li>
+<li>
+<strong>Extract SE</strong>: Read the standard error of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+coefficient from the inverse Hessian.</li>
+</ol>
+<p>The Gauss-Hermite nodes and weights are scaled to match
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>
+via the transformation:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>j</mi></msub><mo>=</mo><msqrt><mn>2</mn></msqrt><msub><mi>σ</mi><mi>x</mi></msub><mo>⋅</mo><msub><mi>n</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">x_j = \sqrt{2} \sigma_x \cdot n_j</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
+are the standard Hermite nodes.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="binary-predictor">Binary predictor<a class="anchor" aria-label="anchor" href="#binary-predictor"></a>
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
 </h2>
+<div class="section level3">
+<h3 id="binary-predictor">Binary predictor<a class="anchor" aria-label="anchor" href="#binary-predictor"></a>
+</h3>
 <p>Suppose the anticipated distribution of outcome categories in the
 control arm is:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.15</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.45</span><span class="op">)</span></span></code></pre></div>
 <p>and we anticipate a cOR of 1.7 for the experimental arm relative to
 control.</p>
-<div class="section level3">
-<h3 id="standard-error-at-a-fixed-sample-size">Standard error at a fixed sample size<a class="anchor" aria-label="anchor" href="#standard-error-at-a-fixed-sample-size"></a>
-</h3>
+<div class="section level4">
+<h4 id="standard-error-at-a-fixed-sample-size">Standard error at a fixed sample size<a class="anchor" aria-label="anchor" href="#standard-error-at-a-fixed-sample-size"></a>
+</h4>
 <p><code><a href="../reference/se_binary_po.html">se_binary_po()</a></code> returns the standard error of the log
 cOR, and a confidence interval for the cOR itself, at a given total
 sample size <code>n</code>:</p>
@@ -153,17 +278,17 @@ sample size <code>n</code>:</p>
 <span><span class="co">#&gt; $method</span></span>
 <span><span class="co">#&gt; [1] "whitehead"</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="sample-size-for-a-target-precision">Sample size for a target precision<a class="anchor" aria-label="anchor" href="#sample-size-for-a-target-precision"></a>
-</h3>
+<div class="section level4">
+<h4 id="sample-size-for-a-target-precision">Sample size for a target precision<a class="anchor" aria-label="anchor" href="#sample-size-for-a-target-precision"></a>
+</h4>
 <p>More commonly we want the sample size needed to achieve a target
 precision, expressed as the ratio of the upper to lower confidence limit
 for the OR (<code>ratio_UL</code>). <code><a href="../reference/n_precision_binary_po.html">n_precision_binary_po()</a></code>
-computes this.</p>
+computes this, here for <code>ratio_UL=3</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/n_precision_binary_po.html">n_precision_binary_po</a></span><span class="op">(</span><span class="va">pc</span>, OR <span class="op">=</span> <span class="fl">1.7</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $n</span></span>
-<span><span class="co">#&gt; numeric(0)</span></span>
+<span><span class="co">#&gt; [1] 168</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $conf</span></span>
 <span><span class="co">#&gt; [1] 0.95</span></span>
@@ -179,23 +304,22 @@ computes this.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $uci_OR</span></span>
 <span><span class="co">#&gt; [1] 2.944486</span></span></code></pre></div>
-<p>So a sample size of would be needed to constrain the cOR’s confidence
-interval to a 3-fold ratio between its limits.</p>
+<p>So a sample size of 168 would be needed to constrain the cOR’s
+confidence interval to a 3-fold ratio between its limits.</p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="continuous-predictor">Continuous predictor<a class="anchor" aria-label="anchor" href="#continuous-predictor"></a>
-</h2>
+<div class="section level3">
+<h3 id="continuous-predictor">Continuous predictor<a class="anchor" aria-label="anchor" href="#continuous-predictor"></a>
+</h3>
 <p>For a continuous predictor <code>x</code>, the anticipated
 outcome-category distribution is instead specified at
-<code>x = mean(x)</code> (<code>p0</code>), along with the log cOR per
-unit of <code>x</code> (<code>beta</code>) and the SD of <code>x</code>
-(<code>sd_x</code>):</p>
+<code>x = 0</code>, along with the cOR per unit of <code>x</code>
+(<code>OR</code>) and the SD of <code>x</code> (<code>sd_x</code>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2496151 1.4999998 0.9196413 2.4466056</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.2496151 1.5000000 0.9196414 2.4466059</span></span></code></pre></div>
 <p>An <code>R2</code> argument allows for the predictor’s effective
 information to be reduced when other covariates explain some of its
 variance (e.g. when adjusting for baseline covariates). For example, if
@@ -205,50 +329,49 @@ other covariates explain 30% of the variance of <code>x</code>, set
 <code class="sourceCode R"><span><span class="co"># Without adjustment for other covariates (R2 = 0)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2496151 1.4999998 0.9196413 2.4466056</span></span>
+<span><span class="co">#&gt; 0.2496151 1.5000000 0.9196414 2.4466059</span></span>
 <span></span>
 <span><span class="co"># With other covariates explaining 30% of variance of x (R2 = 0.3)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0.3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2983471 1.4999997 0.8358679 2.6918117</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.2983471 1.5000000 0.8358681 2.6918123</span></span></code></pre></div>
 <p>Notice that the SE increases when <code>R2 = 0.3</code> (and
 correspondingly the confidence interval widens), reflecting the loss of
 information due to confounding or correlation with other covariates.</p>
-<div class="section level3">
-<h3 id="effect-size-parameterization-or-vs-or_sd">Effect size parameterization: <code>OR</code> vs
+<div class="section level4">
+<h4 id="effect-size-parameterization-or-vs-or_sd">Effect size parameterization: <code>OR</code> vs
 <code>OR_sd</code><a class="anchor" aria-label="anchor" href="#effect-size-parameterization-or-vs-or_sd"></a>
-</h3>
-<p>The effect size can be specified in two ways (note: these are log OR
-values):</p>
+</h4>
+<p>The effect size can be specified in two ways:</p>
 <ul>
 <li>
-<code>OR</code>: log OR per <strong>raw unit</strong> of
+<code>OR</code>: cOR per <strong>raw unit</strong> of
 <code>x</code>
 </li>
 <li>
-<code>OR_sd</code>: log OR per <strong>SD</strong> of
+<code>OR_sd</code>: cOR per <strong>SD</strong> of
 <code>x</code>
 </li>
 </ul>
 <p>These are equivalent ways of specifying the same effect. For example,
-with <code>sd_x = 0.5</code>, a log OR per raw unit of
-<code>log(1.5)</code> is equivalent to a log OR per SD of
+with <code>sd_x = 0.5</code>, a cOR per raw unit of
+<code>log(1.5)</code> is equivalent to a cOR per SD of
 <code>log(sqrt(1.5)</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># OR: log OR per raw unit</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2496151 1.4999998 0.9196413 2.4466056</span></span>
+<span><span class="co">#&gt; 0.2496151 1.5000000 0.9196414 2.4466059</span></span>
 <span></span>
 <span><span class="co"># OR_sd: log OR per SD (equivalent when sd_x = 0.5)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2496151 1.4999998 0.9196413 2.4466056</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.2496151 1.5000000 0.9196414 2.4466059</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="change-parameterization-delta-vs-delta_sd">Change parameterization: <code>delta</code> vs
+<div class="section level4">
+<h4 id="change-parameterization-delta-vs-delta_sd">Change parameterization: <code>delta</code> vs
 <code>delta_sd</code><a class="anchor" aria-label="anchor" href="#change-parameterization-delta-vs-delta_sd"></a>
-</h3>
+</h4>
 <p>Similarly, the reported change in <code>x</code> can be expressed in
 two ways:</p>
 <ul>
@@ -261,38 +384,29 @@ two ways:</p>
 <code>x</code>
 </li>
 </ul>
-<p>These control only what change in <code>x</code> the <em>output</em>
-is expressed over; they don’t change the underlying effect size. For
-example, with <code>sd_x = 0.5</code>:</p>
+<p>For example, with <code>sd_x = 0.5</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># delta: OR for a 1-unit change in x</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.2496151 1.4999998 0.9196413 2.4466056</span></span>
-<span></span>
-<span><span class="co"># delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)</span></span>
-<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.1248076 1.2247448 0.9589793 1.5641629</span></span></code></pre></div>
-<p>Note that the reported log ORs differ: with <code>delta = 0.5</code>
-we get the same result as <code>delta_sd = 1</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">0.5</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.1248076 1.2247448 0.9589793 1.5641629</span></span>
+<span><span class="co">#&gt; 0.1248076 1.2247449 0.9589793 1.5641630</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; se_log_OR        OR  lower_OR  upper_OR </span></span>
-<span><span class="co">#&gt; 0.1248076 1.2247448 0.9589793 1.5641629</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.1248076 1.2247449 0.9589793 1.5641630</span></span></code></pre></div>
+<p>In the first example, we express the change in <code>x</code> in a
+raw unit increase of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>.
+This is the same, as when we express it by a ‘one SD’ increase
+<code>delta_sd=1</code>.</p>
 </div>
-<div class="section level3">
-<h3 id="sample-size-for-a-target-precision-1">Sample size for a target precision<a class="anchor" aria-label="anchor" href="#sample-size-for-a-target-precision-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="sample-size-for-a-target-precision-1">Sample size for a target precision<a class="anchor" aria-label="anchor" href="#sample-size-for-a-target-precision-1"></a>
+</h4>
 <p><code><a href="../reference/n_precision_cont_po.html">n_precision_cont_po()</a></code> gives the sample size for a target
 CI-width ratio, expressed for the OR per <code>delta</code> units of
 <code>x</code>. It supports the same <code>OR</code>/<code>OR_sd</code>
 and <code>delta</code>/<code>delta_sd</code> options:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using OR and delta</span></span>
 <span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                     delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
@@ -330,6 +444,7 @@ and <code>delta</code>/<code>delta_sd</code> options:</p>
 <span><span class="co">#&gt; [1] 2.12132</span></span></code></pre></div>
 </div>
 </div>
+</div>
 <div class="section level2">
 <h2 id="simulation-validation">Simulation validation<a class="anchor" aria-label="anchor" href="#simulation-validation"></a>
 </h2>
@@ -337,7 +452,7 @@ and <code>delta</code>/<code>delta_sd</code> options:</p>
 results, we can simulate data from a proportional-odds model and compare
 the empirical standard error with the one predicted by
 <code><a href="../reference/se_cont_po.html">se_cont_po()</a></code>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set up simulation parameters</span></span>
@@ -395,11 +510,14 @@ the empirical standard error with the one predicted by
 predicted SE, validating the theoretical calculations. The ratio should
 be close to 1.</p>
 <p>Distribution of beta estimates:</p>
-<p><img src="presizepo_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="presizepo_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Julious, S.A. (2004) Tutorial in biostatistics - Sample sizes for
+clinical trials with Normal data. <em>Statistics in Medicine</em>, 23
+(12). pp. 1921-1986.</p>
 <p>Whitehead, J. (1993). Sample size calculations for ordered
 categorical data. <em>Statistics in Medicine</em>, 12(24),
 2257-2271.</p>

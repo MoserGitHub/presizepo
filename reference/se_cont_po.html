@@ -167,23 +167,23 @@ below). To report an OR of 1.5 <em>for</em> a 2-SD change, supply
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6406679 1.5000000 0.4273205 5.2653689 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_log_OR         OR   lower_OR   upper_OR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.2813359  1.5000000  0.1217352 18.4827396 </span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6445034 1.5000005 0.4241204 5.3051012 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6445034 1.5000000 0.4241202 5.3050995 </span>
 <span class="r-in"><span><span class="co"># equivalently, specifying the effect as OR per SD of x</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6404217 2.2500000 0.6412902 7.8942423 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_log_OR         OR   lower_OR   upper_OR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.2808434  2.2500000  0.1827791 27.6973605 </span>
 <span class="r-in"><span><span class="co"># OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6404217 2.2500000 0.6412902 7.8942423 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_log_OR         OR   lower_OR   upper_OR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.2808434  2.2500000  0.1827791 27.6973605 </span>
 <span class="r-in"><span><span class="co"># equivalently, specifying the change directly in SDs of x</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> se_log_OR        OR  lower_OR  upper_OR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.6404217 2.2500000 0.6412902 7.8942423 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_log_OR         OR   lower_OR   upper_OR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.2808434  2.2500000  0.1827791 27.6973605 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># OR_sd is per 1 SD; delta_sd only rescales the *output*, so with</span></span></span>
 <span class="r-in"><span><span class="co"># delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:</span></span></span>
