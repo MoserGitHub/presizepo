@@ -76,13 +76,12 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>presizepo</code> computes precision-based (confidence-interval
-width) sample sizes and standard errors for the log odds ratio from a
-proportional-odds (ordinal logistic regression) model. Two predictor
-types are supported:</p>
+<p><code>presizepo</code> is precision-based (confidence-interval width)
+sample size calculation approach for the log common odds ratio (cOR)
+from a proportional-odds model. Two predictor types are supported:</p>
 <ul>
-<li>a <strong>binary</strong> group predictor (e.g. treatment
-vs. control), via <code><a href="../reference/se_binary_po.html">se_binary_po()</a></code> and
+<li>a <strong>binary</strong> predictor (e.g. treatment vs control), via
+<code><a href="../reference/se_binary_po.html">se_binary_po()</a></code> and
 <code><a href="../reference/n_precision_binary_po.html">n_precision_binary_po()</a></code>;</li>
 <li>a <strong>continuous</strong> predictor, via
 <code><a href="../reference/se_cont_po.html">se_cont_po()</a></code> and <code><a href="../reference/n_precision_cont_po.html">n_precision_cont_po()</a></code>.</li>
@@ -91,16 +90,14 @@ vs. control), via <code><a href="../reference/se_binary_po.html">se_binary_po()
 <code>method</code>:</p>
 <ul>
 <li>
-<code>"whitehead"</code> - Whitehead’s (1993) closed-form
-delta-method variance approximation. Assumes proportional odds and can
-be inaccurate for large effects.</li>
+<code>"whitehead"</code> - Whitehead’s (1993) formula.</li>
 <li>
 <code>"ologit"</code> (default) - fits a weighted proportional-odds
 model directly to the anticipated distribution and reads the standard
 error off the observed information matrix, following White,
 Marley-Zagar, Morris, Parmar, Royston &amp; Babiker (2023).</li>
 </ul>
-<p>The two methods nearly agree for small effects and diverge as the
+<p>The two methods are similar for small effects and diverge as the
 anticipated effect size grows.</p>
 </div>
 <div class="section level2">
@@ -110,19 +107,14 @@ anticipated effect size grows.</p>
 control arm is:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.15</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.45</span><span class="op">)</span></span></code></pre></div>
-<p>and we anticipate a proportional odds ratio of 1.7 for the
-experimental arm relative to control. Instead of <code>OR</code>, the
-experimental-arm distribution can also be supplied directly via
-<code>pe</code>, or implied by a common risk ratio <code>rr</code> on
-the cumulative probabilities; exactly one of <code>OR</code>,
-<code>pe</code>, <code>rr</code> must be given.</p>
+<p>and we anticipate a cOR of 1.7 for the experimental arm relative to
+control.</p>
 <div class="section level3">
 <h3 id="standard-error-at-a-fixed-sample-size">Standard error at a fixed sample size<a class="anchor" aria-label="anchor" href="#standard-error-at-a-fixed-sample-size"></a>
 </h3>
-<p><code><a href="../reference/se_binary_po.html">se_binary_po()</a></code> returns the standard error of the log OR,
-and a confidence interval for the OR itself, at a given total sample
-size <code>n</code> (split between arms according to the allocation
-ratio <code>r</code>):</p>
+<p><code><a href="../reference/se_binary_po.html">se_binary_po()</a></code> returns the standard error of the log
+cOR, and a confidence interval for the cOR itself, at a given total
+sample size <code>n</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/se_binary_po.html">se_binary_po</a></span><span class="op">(</span><span class="va">pc</span>, OR <span class="op">=</span> <span class="fl">1.7</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $OR</span></span>
@@ -167,9 +159,7 @@ ratio <code>r</code>):</p>
 <p>More commonly we want the sample size needed to achieve a target
 precision, expressed as the ratio of the upper to lower confidence limit
 for the OR (<code>ratio_UL</code>). <code><a href="../reference/n_precision_binary_po.html">n_precision_binary_po()</a></code>
-computes this by fitting once at a large reference sample size and
-rescaling analytically (the Fisher information scales linearly with
-<code>n</code>):</p>
+computes this.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/n_precision_binary_po.html">n_precision_binary_po</a></span><span class="op">(</span><span class="va">pc</span>, OR <span class="op">=</span> <span class="fl">1.7</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $n</span></span>
@@ -189,7 +179,7 @@ rescaling analytically (the Fisher information scales linearly with
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $uci_or</span></span>
 <span><span class="co">#&gt; [1] 2.944486</span></span></code></pre></div>
-<p>So a sample size of 168 would be needed to constrain the OR’s
+<p>So a sample size of 168 would be needed to constrain the cOR’s
 confidence interval to a 3-fold ratio between its limits.</p>
 </div>
 </div>
@@ -198,7 +188,7 @@ confidence interval to a 3-fold ratio between its limits.</p>
 </h2>
 <p>For a continuous predictor <code>x</code>, the anticipated
 outcome-category distribution is instead specified at
-<code>x = mean(x)</code> (<code>p0</code>), along with the log OR per
+<code>x = mean(x)</code> (<code>p0</code>), along with the log cOR per
 unit of <code>x</code> (<code>beta</code>) and the SD of <code>x</code>
 (<code>sd_x</code>):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -206,15 +196,24 @@ unit of <code>x</code> (<code>beta</code>) and the SD of <code>x</code>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
 <span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span></code></pre></div>
-<p>Here <code>method = "ologit"</code> integrates out the mixing
-distribution of <code>x</code> (assumed normal) via Gauss-Hermite
-quadrature (<code>ngrid</code> nodes), jointly estimating the cutpoints
-and <code>beta</code>; <code>"whitehead"</code> instead evaluates a
-closed-form variance formula at fixed cutpoints derived from
-<code>p0</code>.</p>
 <p>An <code>R2</code> argument allows for the predictor’s effective
 information to be reduced when other covariates explain some of its
-variance (e.g. when adjusting for baseline covariates).</p>
+variance (e.g. when adjusting for baseline covariates). For example, if
+other covariates explain 30% of the variance of <code>x</code>, set
+<code>R2 = 0.3</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Without adjustment for other covariates (R2 = 0)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
+<span></span>
+<span><span class="co"># With other covariates explaining 30% of variance of x (R2 = 0.3)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, R2 <span class="op">=</span> <span class="fl">0.3</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.4054649 0.2983471 0.8358679 2.6918117</span></span></code></pre></div>
+<p>Notice that the SE increases when <code>R2 = 0.3</code> (and
+correspondingly the confidence interval widens), reflecting the loss of
+information due to confounding or correlation with other covariates.</p>
 <div class="section level3">
 <h3 id="effect-size-parameterization-beta-vs-beta_sd">Effect size parameterization: <code>beta</code> vs
 <code>beta_sd</code><a class="anchor" aria-label="anchor" href="#effect-size-parameterization-beta-vs-beta_sd"></a>
@@ -222,19 +221,19 @@ variance (e.g. when adjusting for baseline covariates).</p>
 <p>The effect size can be specified in two ways:</p>
 <ul>
 <li>
-<code>beta</code>: log OR per <strong>raw unit</strong> of
+<code>beta</code>: log cOR per <strong>raw unit</strong> of
 <code>x</code>
 </li>
 <li>
-<code>beta_sd</code>: log OR per <strong>SD</strong> of
+<code>beta_sd</code>: log cOR per <strong>SD</strong> of
 <code>x</code>
 </li>
 </ul>
 <p>These are equivalent ways of specifying the same effect. For example,
-with <code>sd_x = 0.5</code>, a log OR per raw unit of
-<code>log(1.5)</code> is equivalent to a log OR per SD of
+with <code>sd_x = 0.5</code>, a log cOR per raw unit of
+<code>log(1.5)</code> is equivalent to a log OcR per SD of
 <code>log(1.5) * 0.5</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># beta: log OR per raw unit</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
@@ -264,7 +263,7 @@ two ways:</p>
 <p>These control only what change in <code>x</code> the <em>output</em>
 is expressed over; they don’t change the underlying effect size. For
 example, with <code>sd_x = 0.5</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># delta: OR for a 1-unit change in x</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
@@ -276,7 +275,7 @@ example, with <code>sd_x = 0.5</code>:</p>
 <span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span></code></pre></div>
 <p>Note that the reported log ORs differ: with <code>delta = 0.5</code>
 we get the same result as <code>delta_sd = 1</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)</span></span>
 <span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">0.5</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
@@ -293,7 +292,7 @@ CI-width ratio, expressed for the OR per <code>delta</code> units of
 <code>x</code>. It supports the same
 <code>beta</code>/<code>beta_sd</code> and
 <code>delta</code>/<code>delta_sd</code> options:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Using beta and delta</span></span>
 <span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                     delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
@@ -338,7 +337,7 @@ CI-width ratio, expressed for the OR per <code>delta</code> units of
 results, we can simulate data from a proportional-odds model and compare
 the empirical standard error with the one predicted by
 <code><a href="../reference/se_cont_po.html">se_cont_po()</a></code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set up simulation parameters</span></span>
@@ -363,12 +362,12 @@ the empirical standard error with the one predicted by
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_obs</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="va">sd_x</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="co"># Generate ordinal outcome from proportional-odds model</span></span>
-<span>  <span class="co"># Compute cumulative probabilities: P(Y &lt;= k) for k = 0, ..., K-2</span></span>
+<span>  <span class="co"># Compute cumulative probabilities: P(Y &lt;= k)</span></span>
 <span>  <span class="va">cutpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">p0</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">p0</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">eta</span> <span class="op">&lt;-</span> <span class="va">beta</span> <span class="op">*</span> <span class="va">x</span></span>
-<span>  <span class="va">p_cumulative</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">cutpoints</span>, <span class="va">eta</span>, <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># (K-1) x n matrix</span></span>
+<span>  <span class="va">p_cumulative</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">cutpoints</span>, <span class="va">eta</span>, <span class="st">"-"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  </span>
-<span>  <span class="co"># Convert to category probabilities: P(Y = k) for k = 1, ..., K</span></span>
+<span>  <span class="co"># Convert to category probabilities: P(Y = k)</span></span>
 <span>  <span class="va">p_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">p_cumulative</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, </span>
 <span>                 <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">p_cumulative</span>, margin <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                 <span class="fl">1</span> <span class="op">-</span> <span class="va">p_cumulative</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_cumulative</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
@@ -395,13 +394,13 @@ the empirical standard error with the one predicted by
 predicted SE, validating the theoretical calculations. The ratio should
 be close to 1.</p>
 <p>We can also visualize the distribution of beta estimates:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">beta_hats</span>, breaks <span class="op">=</span> <span class="fl">30</span>, main <span class="op">=</span> <span class="st">"Distribution of beta estimates from simulation"</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Estimated beta"</span>, freq <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">beta</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">beta_hats</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"True beta"</span>, <span class="st">"Mean of estimates"</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="presizepo_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="presizepo_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
