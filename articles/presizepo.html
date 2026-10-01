@@ -102,7 +102,7 @@ anticipated effect size grows.</p>
 <p><code>presizepo</code> offers two approaches for calculating the
 standard error of the log odds ratio.</p>
 <div class="section level3">
-<h3 id="whiteheads-1993-formula">Whitehead’s (1993) Formula<a class="anchor" aria-label="anchor" href="#whiteheads-1993-formula"></a>
+<h3 id="whiteheads-1993-formula-the-nn-local-method">Whitehead’s (1993) Formula — The NN (Local) Method<a class="anchor" aria-label="anchor" href="#whiteheads-1993-formula-the-nn-local-method"></a>
 </h3>
 <p>Whitehead (1993) originally derived his formula for
 <strong>hypothesis testing</strong> sample size calculations with
@@ -136,6 +136,13 @@ is</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">SE</mtext><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mfrac><mrow><mn>3</mn><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>+</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>r</mi><mi>n</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msubsup><mover><mi>p</mi><mo accent="true">‾</mo></mover><mi>k</mi><mn>3</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></msqrt><mi>.</mi></mrow><annotation encoding="application/x-tex">\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_{k} \bar{p}_k^3)}}.</annotation></semantics></math>
 From this relationship, one can solve for the sample size needed to
 achieve a target confidence interval width.</p>
+<p>White et al. (2023) classify this as the <strong>NN (Local)
+method</strong>, which is based on a “local” assumption (small treatment
+effects) and uses the variance computed at the null hypothesis. However,
+for precision-based sample size calculations where you condition on an
+anticipated effect size, this same formula provides the information
+structure regardless of whether you’re explicitly doing hypothesis
+testing.</p>
 <p>For a continuous predictor
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>
 one can adapt Whitehead’s formula to:</p>
@@ -154,18 +161,43 @@ using a fixed quantile grid approach with 2000 points from
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>.</p>
 </div>
 <div class="section level3">
-<h3 id="white-et-al--2023-method-ologit">White et al. (2023) Method: “ologit”<a class="anchor" aria-label="anchor" href="#white-et-al--2023-method-ologit"></a>
+<h3 id="white-et-al--2023-methods-three-approaches-nn-na-aa">White et al. (2023) Methods: Three Approaches (NN, NA, AA)<a class="anchor" aria-label="anchor" href="#white-et-al--2023-methods-three-approaches-nn-na-aa"></a>
 </h3>
-<p>White et al. (2023) propose a more direct approach that avoids
-delta-method approximation by fitting a weighted proportional-odds model
-to the anticipated data distribution and extracting the standard error
-from the observed information matrix.</p>
-<p>For binary predictors the algorithm is:</p>
+<p>White et al. (2023) distinguish between three statistical approaches
+for hypothesis testing and sample size calculations:</p>
+<ul>
+<li>
+<strong>Method NN</strong> (Local/Whitehead): Uses variance computed
+under assumptions of small treatment effects; based on the null variance
+but applied in the local neighborhood. This is Whitehead’s (1993)
+closed-form delta-method formula, and it is <strong>implemented in
+presizepo</strong> as the <code>"whitehead"</code> method.</li>
+<li>
+<strong>Method NA</strong> (Distant/Score test): Uses variance
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>N</mi></msub><annotation encoding="application/x-tex">V_N</annotation></semantics></math>
+estimated strictly under the null hypothesis
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\beta = 0</annotation></semantics></math>,
+OR = 1); appropriate for score test-based inference. <strong>Not
+implemented in presizepo</strong>.</li>
+<li>
+<strong>Method AA</strong> (Wald test): Uses variance
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>A</mi></msub><annotation encoding="application/x-tex">V_A</annotation></semantics></math>
+estimated under the alternative hypothesis (at the anticipated effect
+size); appropriate for Wald test-based inference. This is
+<strong>implemented in presizepo</strong> as the <code>"ologit"</code>
+method.</li>
+</ul>
+<p><code>presizepo</code> implements both the NN (Whitehead) and AA
+methods, which are appropriate for precision-based calculations
+(confidence interval width), where we condition on the anticipated
+effect size.</p>
+<p>For binary predictors the AA algorithm is:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Construct anticipated data</strong>: Create a weighted
 frequency table from the anticipated outcome category probabilities at
-each treatment level (control and treatment arms).</li>
+each treatment level (control and treatment arms), using the specified
+effect size (OR).</li>
 <li>
 <strong>Fit weighted proportional-odds model</strong>: Fit a
 proportional odds model to this table, with weights proportional to arm
@@ -174,8 +206,9 @@ size and allocation ratio.</li>
 <strong>Extract SE</strong>: Read the standard error of the
 treatment coefficient
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>)
-directly from the inverse Hessian matrix (observed information
-matrix).</li>
+directly from the inverse Hessian matrix (observed information matrix),
+which gives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mrow><msub><mi>V</mi><mi>A</mi></msub><mi>/</mi><mi>n</mi></mrow></msqrt><annotation encoding="application/x-tex">\sqrt{V_A/n}</annotation></semantics></math>.</li>
 </ol>
 <p>For continuous
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>x</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">x \sim N(0, \sigma_x^2)</annotation></semantics></math>
