@@ -168,17 +168,15 @@ for hypothesis testing and sample size calculations:</p>
 <ul>
 <li>
 <strong>Method NN</strong> (Local/Whitehead): Uses variance computed
-under assumptions of small treatment effects; based on the null variance
-but applied in the local neighborhood. This is Whitehead’s (1993)
-closed-form delta-method formula, and it is <strong>implemented in
-presizepo</strong> as the <code>"whitehead"</code> method.</li>
+under assumptions of small treatment effects based on the null variance.
+This is Whitehead’s (1993) formula.</li>
 <li>
 <strong>Method NA</strong> (Distant/Score test): Uses variance
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>N</mi></msub><annotation encoding="application/x-tex">V_N</annotation></semantics></math>
-estimated strictly under the null hypothesis
+estimated under the null hypothesis
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\beta = 0</annotation></semantics></math>,
-OR = 1); appropriate for score test-based inference. <strong>Not
-implemented in presizepo</strong>.</li>
+OR = 1) and alternative hypothesis; appropriate for score test-based
+inference. <strong>Not implemented in presizepo</strong>.</li>
 <li>
 <strong>Method AA</strong> (Wald test): Uses variance
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>A</mi></msub><annotation encoding="application/x-tex">V_A</annotation></semantics></math>
