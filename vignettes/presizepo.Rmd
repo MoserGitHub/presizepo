@@ -103,12 +103,66 @@ An `R2` argument allows for the predictor's effective information to be
 reduced when other covariates explain some of its variance (e.g. when
 adjusting for baseline covariates).
 
-`n_precision_cont_po()` gives the sample size for a target CI-width
-ratio, expressed for the OR per `delta` units of `x`:
+### Effect size parameterization: `beta` vs `beta_sd`
+
+The effect size can be specified in two ways:
+
+* `beta`: log OR per **raw unit** of `x`
+* `beta_sd`: log OR per **SD** of `x`
+
+These are equivalent ways of specifying the same effect. For example, with
+`sd_x = 0.5`, a log OR per raw unit of `log(1.5)` is equivalent to a log OR
+per SD of `log(1.5) * 0.5`:
 
 ```{r}
+# beta: log OR per raw unit
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, method = "ologit")
+
+# beta_sd: log OR per SD (equivalent when sd_x = 0.5)
+se_cont_po(p0, beta_sd = log(1.5) * 0.5, sd_x = 0.5, n = 200, method = "ologit")
+```
+
+### Change parameterization: `delta` vs `delta_sd`
+
+Similarly, the reported change in `x` can be expressed in two ways:
+
+* `delta`: change in **raw units** of `x`
+* `delta_sd`: change in **SDs** of `x`
+
+These control only what change in `x` the *output* is expressed over; they 
+don't change the underlying effect size. For example, with `sd_x = 0.5`:
+
+```{r}
+# delta: OR for a 1-unit change in x
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, delta = 1, method = "ologit")
+
+# delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
+```
+
+Note that the reported log ORs differ: with `delta = 0.5` we get the same
+result as `delta_sd = 1`:
+
+```{r}
+# delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, delta = 0.5, method = "ologit")
+se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 200, delta_sd = 1, method = "ologit")
+```
+
+### Sample size for a target precision
+
+`n_precision_cont_po()` gives the sample size for a target CI-width
+ratio, expressed for the OR per `delta` units of `x`. It supports the same
+`beta`/`beta_sd` and `delta`/`delta_sd` options:
+
+```{r}
+# Using beta and delta
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3,
                      delta = 1, method = "ologit")
+
+# Using beta_sd and delta_sd (specifying effect and change per SD)
+n_precision_cont_po(p0, beta_sd = log(1.5) * 0.5, sd_x = 0.5, ratio_UL = 3,
+                     delta_sd = 1, method = "ologit")
 ```
 
 

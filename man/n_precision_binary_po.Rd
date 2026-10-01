@@ -45,8 +45,8 @@ Computes the total sample size \code{n} needed so that the confidence
 interval for the odds ratio has a target ratio of upper to lower limit,
 for a binary predictor in a proportional-odds model. Since the Fisher
 information scales linearly with \code{n}, the SE at any \code{n} is
-\code{SE(n0) * sqrt(n0 / n)} exactly (for either method); the fit is done once
-at \code{n0} and rescaled analytically.
+\code{SE(n0) * sqrt(n0 / n)}; the fit is done once
+at \code{n0} and \code{n} is rescaled.
 }
 \examples{
 pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)

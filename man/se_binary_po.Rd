@@ -7,7 +7,7 @@
 se_binary_po(
   p0,
   OR = NULL,
-  pe = NULL,
+  p1 = NULL,
   rr = NULL,
   n,
   r = 1,
@@ -46,17 +46,10 @@ Two approaches to the SE are supported, selectable via \code{method}:
 (fast, closed-form; assumes proportional odds and can be inaccurate for
 large effects).
 \item \code{"ologit"} - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
-(2023) fit a weighted proportional-odds model directly to the
-anticipated distribution and read the SE off the observed information
-matrix. This is exact (no delta-method approximation): the SE is
-computed from a fit at the anticipated (alternative) arm-level
-probabilities, i.e. their "SA" variant, since trial data actually arise
-under (approximately) the planning effect, not under a null effect.
+(2023) fit a weighted proportional-odds model to the
+anticipated distribution and use the SE from the observed information
+matrix. This is their "AA" variant.
 }
-
-\code{"whitehead"} and \code{"ologit"} nearly coincide for small effects and diverge
-as the anticipated effect grows, which is White et al.'s stated
-motivation for preferring the exact \code{"ologit"} fit for large effects.
 }
 \examples{
 pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)

@@ -12,7 +12,7 @@ n_precision_cont_po(
   delta = NULL,
   R2 = 0,
   conf = 0.95,
-  OR_sd = NULL,
+  beta_sd = NULL,
   delta_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
@@ -22,10 +22,11 @@ n_precision_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
 
-\item{beta}{Log OR per unit of \code{x}. Exactly one of \code{beta}, \code{OR_sd} must
+\item{beta}{Log OR per unit of \code{x}. Exactly one of \code{beta}, \code{beta_sd} must
 be supplied.}
 
-\item{sd_x}{SD of the predictor \code{x}.}
+\item{sd_x}{SD of the predictor \code{x}. \code{x} is assumed to be centered (mean
+0) and Gaussian, \code{x ~ N(0, sd_x^2)}.}
 
 \item{ratio_UL}{Target ratio of the upper to lower confidence limit for
 the OR per \code{delta}/\code{delta_sd} change in \code{x}.}
@@ -40,11 +41,10 @@ factor of \code{1 - R2}).}
 
 \item{conf}{Confidence level for the reported interval.}
 
-\item{OR_sd}{Odds ratio per SD of \code{x} (i.e. the OR comparing \code{x} one SD
-above the mean to the mean), given as an alternative to \code{beta} so
+\item{beta_sd}{Log OR per SD of \code{x}, given as an alternative to \code{beta} so
 \code{sd_x} and the effect size don't need to be reconciled by hand;
-internally converted to \code{beta = log(OR_sd) / sd_x}. Exactly one of
-\code{beta}, \code{OR_sd} must be supplied.}
+internally converted to \code{beta = beta_sd / sd_x}. Exactly one of
+\code{beta}, \code{beta_sd} must be supplied.}
 
 \item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
 \code{delta} so \code{sd_x} doesn't need to be multiplied in by hand; internally
@@ -64,8 +64,7 @@ cutpoints derived from \code{p0}.}
 \code{method = "ologit"}).}
 
 \item{n0}{Sample size at which the one-time reference fit is done before
-rescaling; the default is large enough that further increases do not
-change the result.}
+rescaling.}
 }
 \value{
 A list with elements \code{n}, \code{or}, \code{method}, \code{lci}, \code{uci}. \code{or},
@@ -76,15 +75,15 @@ which \code{ratio_UL} was specified.
 \description{
 Computes the total sample size \code{n} needed so that the confidence
 interval for the OR per \code{delta} units of a continuous predictor \code{x} has
-a target ratio of upper to lower limit, using the same
-fit-once-and-rescale trick as \code{\link[=n_precision_binary_po]{n_precision_binary_po()}}.
+a target ratio of upper to lower limit. It uses a Gauss-Hermite quadrature
+approximation for the \code{ologit} method, see details.
 }
 \examples{
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
-# equivalently, specifying the effect as an OR per SD of x
-n_precision_cont_po(p0, OR_sd = 1.5^0.5, sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+# equivalently, specifying the effect as log OR per SD of x
+n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
-n_precision_cont_po(p0, OR_sd = 1.5, sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
 }
