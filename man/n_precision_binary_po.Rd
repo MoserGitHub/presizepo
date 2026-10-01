@@ -2,13 +2,11 @@
 % Please edit documentation in R/precision_po.R
 \name{n_precision_binary_po}
 \alias{n_precision_binary_po}
-\title{Sample size for a target OR precision, binary predictor}
+\title{Sample size for a target common OR precision, binary predictor}
 \usage{
 n_precision_binary_po(
   pc,
-  OR = NULL,
-  pe = NULL,
-  rr = NULL,
+  OR,
   ratio_UL,
   r = 1,
   conf = 0.95,
@@ -19,8 +17,8 @@ n_precision_binary_po(
 \arguments{
 \item{pc}{Control-arm category probabilities (sum to 1).}
 
-\item{OR, pe, rr}{Exactly one, defining the experimental arm; see
-\code{\link[=build_arm_probs]{build_arm_probs()}}.}
+\item{OR}{Proportional (cumulative) odds ratio for the experimental vs.
+control arm.}
 
 \item{ratio_UL}{Target ratio of the upper to lower confidence limit for
 the OR.}

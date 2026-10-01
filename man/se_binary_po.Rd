@@ -4,20 +4,13 @@
 \alias{se_binary_po}
 \title{Standard error of the log odds ratio, binary predictor}
 \usage{
-se_binary_po(
-  p0,
-  OR = NULL,
-  p1 = NULL,
-  rr = NULL,
-  n,
-  r = 1,
-  method = c("ologit", "whitehead"),
-  conf = 0.95
-)
+se_binary_po(pc, OR, n, r = 1, method = c("ologit", "whitehead"), conf = 0.95)
 }
 \arguments{
-\item{OR, pe, rr}{Exactly one, defining the experimental arm; see
-\code{\link[=build_arm_probs]{build_arm_probs()}}.}
+\item{pc}{Control-arm category probabilities (sum to 1).}
+
+\item{OR}{Proportional (cumulative) odds ratio for the experimental vs.
+control arm.}
 
 \item{n}{Total sample size (both arms).}
 
@@ -27,8 +20,6 @@ se_binary_po(
 (delta-method approximation).}
 
 \item{conf}{Confidence level for the reported interval.}
-
-\item{pc}{Control-arm category probabilities (sum to 1).}
 }
 \value{
 A list with elements \code{OR}, \code{conf}, \code{SE} (of the log OR), \code{lower},

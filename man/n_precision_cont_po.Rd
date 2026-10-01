@@ -2,17 +2,17 @@
 % Please edit documentation in R/precision_po.R
 \name{n_precision_cont_po}
 \alias{n_precision_cont_po}
-\title{Sample size for a target OR precision, continuous predictor}
+\title{Sample size for a target common OR precision, continuous predictor}
 \usage{
 n_precision_cont_po(
   p0,
-  beta = NULL,
+  log_beta = NULL,
   sd_x,
   ratio_UL,
   delta = NULL,
   R2 = 0,
   conf = 0.95,
-  beta_sd = NULL,
+  log_OR_sd = NULL,
   delta_sd = NULL,
   method = c("ologit", "whitehead"),
   ngrid = 15,
@@ -22,7 +22,7 @@ n_precision_cont_po(
 \arguments{
 \item{p0}{Outcome category probabilities at \code{x = mean(x)}.}
 
-\item{beta}{Log OR per unit of \code{x}. Exactly one of \code{beta}, \code{beta_sd} must
+\item{log_beta}{Log OR per unit of \code{x}. Exactly one of \code{log_beta}, \code{log_OR_sd} must
 be supplied.}
 
 \item{sd_x}{SD of the predictor \code{x}. \code{x} is assumed to be centered (mean
@@ -41,10 +41,10 @@ factor of \code{1 - R2}).}
 
 \item{conf}{Confidence level for the reported interval.}
 
-\item{beta_sd}{Log OR per SD of \code{x}, given as an alternative to \code{beta} so
+\item{log_OR_sd}{Log OR per SD of \code{x}, given as an alternative to \code{log_beta} so
 \code{sd_x} and the effect size don't need to be reconciled by hand;
-internally converted to \code{beta = beta_sd / sd_x}. Exactly one of
-\code{beta}, \code{beta_sd} must be supplied.}
+internally converted to \code{log_beta = log_OR_sd / sd_x}. Exactly one of
+\code{log_beta}, \code{log_OR_sd} must be supplied.}
 
 \item{delta_sd}{Change in \code{x}, in SDs of \code{x}, given as an alternative to
 \code{delta} so \code{sd_x} doesn't need to be multiplied in by hand; internally
@@ -80,10 +80,10 @@ approximation for the \code{ologit} method, see details.
 }
 \examples{
 p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
-n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
+n_precision_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
 # equivalently, specifying the effect as log OR per SD of x
-n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, log_OR_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
-n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po(p0, log_OR_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
 }

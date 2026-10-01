@@ -1,39 +1,23 @@
 #' Build experimental-arm category probabilities
 #'
 #' Given control-arm outcome-category probabilities, builds the
-#' experimental-arm probabilities implied by exactly one of a proportional
-#' (cumulative) odds ratio `OR`, an experimental-arm probability vector `pe`
-#' given directly, or a common risk ratio `rr` applied to the cumulative
-#' probabilities.
+#' experimental-arm probabilities implied by a proportional (cumulative)
+#' odds ratio `OR`.
 #'
 #' @param pc Numeric vector of control-arm category probabilities, summing
 #'   to 1, ordered from the lowest to the highest category.
 #' @param OR Proportional (cumulative) odds ratio for the experimental vs.
-#'   control arm. Exactly one of `OR`, `pe`, `rr` must be supplied.
-#' @param pe Experimental-arm category probabilities, given directly (same
-#'   length as `pc`).
-#' @param rr A common risk ratio applied to the control-arm cumulative
-#'   probabilities.
+#'   control arm.
 #'
 #' @return A list with elements `p_ctrl` and `p_trt`, the control- and
 #'   experimental-arm category probability vectors.
 #' @noRd
 #' @examples
 #' build_arm_probs(c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45), OR = 1.7)
-build_arm_probs <- function(pc, OR = NULL, pe = NULL, rr = NULL) {
-  n_specified <- sum(!is.null(OR), !is.null(pe), !is.null(rr))
-  if (n_specified != 1) stop("please specify exactly one of OR, pe, rr")
+build_arm_probs <- function(pc, OR) {
   cum_c <- cumsum(pc)[-length(pc)]
-  if (!is.null(pe)) {
-    if (length(pe) != length(pc)) stop("pc and pe have different lengths")
-    p_trt <- pe
-  } else if (!is.null(OR)) {
-    odds_t <- (cum_c / (1 - cum_c)) * OR
-    p_trt <- diff(c(0, odds_t / (1 + odds_t), 1))
-  } else {
-    cum_t <- rr * cum_c
-    p_trt <- diff(c(0, cum_t, 1))
-  }
+  odds_t <- (cum_c / (1 - cum_c)) * OR
+  p_trt <- diff(c(0, odds_t / (1 + odds_t), 1))
   list(p_ctrl = pc, p_trt = p_trt)
 }
 
@@ -53,8 +37,8 @@ build_arm_probs <- function(pc, OR = NULL, pe = NULL, rr = NULL) {
 #'   matrix. This is their "AA" variant.
 #'
 #' @param pc Control-arm category probabilities (sum to 1).
-#' @param OR,pe,rr Exactly one, defining the experimental arm; see
-#'   [build_arm_probs()].
+#' @param OR Proportional (cumulative) odds ratio for the experimental vs.
+#'   control arm.
 #' @param n Total sample size (both arms).
 #' @param r Allocation ratio, treatment:control.
 #' @param method `"ologit"` (default; exact MLE) or `"whitehead"`
@@ -69,12 +53,12 @@ build_arm_probs <- function(pc, OR = NULL, pe = NULL, rr = NULL) {
 #' pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
 #' se_binary_po(pc, OR = 1.7, n = 30, method = "whitehead")
 #' se_binary_po(pc, OR = 1.7, n = 30, method = "ologit")
-se_binary_po <- function(p0, OR = NULL, p1 = NULL, rr = NULL, n, r = 1,
+se_binary_po <- function(pc, OR, n, r = 1,
                          method = c("ologit", "whitehead"), conf = 0.95) {
   method <- match.arg(method)
   z <- stats::qnorm(1 - (1 - conf) / 2)
 
-  probs <- build_arm_probs(p0, OR, p1, rr)
+  probs <- build_arm_probs(pc, OR)
   p_ctrl <- probs$p_ctrl
   p_trt <- probs$p_trt
   levels_n <- length(p_ctrl)
@@ -102,7 +86,7 @@ se_binary_po <- function(p0, OR = NULL, p1 = NULL, rr = NULL, n, r = 1,
        method = method)
 }
 
-#' Sample size for a target OR precision, binary predictor
+#' Sample size for a target common OR precision, binary predictor
 #'
 #' Computes the total sample size `n` needed so that the confidence
 #' interval for the odds ratio has a target ratio of upper to lower limit,
@@ -111,9 +95,15 @@ se_binary_po <- function(p0, OR = NULL, p1 = NULL, rr = NULL, n, r = 1,
 #' `SE(n0) * sqrt(n0 / n)`; the fit is done once
 #' at `n0` and `n` is rescaled.
 #'
-#' @inheritParams se_binary_po
+#' @param pc Control-arm category probabilities (sum to 1).
+#' @param OR Proportional (cumulative) odds ratio for the experimental vs.
+#'   control arm.
 #' @param ratio_UL Target ratio of the upper to lower confidence limit for
 #'   the OR.
+#' @param r Allocation ratio, treatment:control.
+#' @param conf Confidence level for the reported interval.
+#' @param method `"ologit"` (default; exact MLE) or `"whitehead"`
+#'   (delta-method approximation).
 #' @param n0 Sample size at which the one-time reference fit is done before
 #'   rescaling; the default is large enough that further increases do not
 #'   change the result.
@@ -126,12 +116,12 @@ se_binary_po <- function(p0, OR = NULL, p1 = NULL, rr = NULL, n, r = 1,
 #' pc <- c(0.15, 0.10, 0.10, 0.10, 0.10, 0.45)
 #' n_precision_binary_po(pc, OR = 2, ratio_UL = 3, method = "whitehead")
 #' n_precision_binary_po(pc, OR = 2, ratio_UL = 3, method = "ologit")
-n_precision_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, ratio_UL, r = 1,
+n_precision_binary_po <- function(pc, OR, ratio_UL, r = 1,
                                   conf = 0.95, method = c("ologit", "whitehead"), n0 = 1000) {
   method <- match.arg(method)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z)
-  fit0 <- se_binary_po(pc, OR, pe, rr, n = n0, r = r, method = method)
+  fit0 <- se_binary_po(pc, OR, n = n0, r = r, method = method)
   n <- ceiling(n0 * (fit0$SE / target_se)^2)
   list(n = n, conf = conf, OR = fit0$OR, method = method,
        lci_or = exp(log(fit0$OR) - z * target_se), uci_or = exp(log(fit0$OR) + z * target_se))
@@ -140,22 +130,21 @@ n_precision_binary_po <- function(pc, OR = NULL, pe = NULL, rr = NULL, ratio_UL,
 
 #' Resolve the per-unit log OR for a continuous predictor (internal)
 #'
-#' `beta` (per raw unit of `x`) and `beta_sd` (log OR per SD of `x`) are
-#' two ways of specifying the same effect; exactly one must be supplied.
-#' This converts either into the per-unit log OR used internally by
-#' [se_cont_po()] and [n_precision_cont_po()].
+#' Converts either `log_beta` (per raw unit of `x`) or `log_OR_sd` (log OR per SD of `x`)
+#' into the per-unit log OR used internally by [se_cont_po()] and [n_precision_cont_po()].
+#' These may be derived from OR/OR_sd parameters by taking the log.
 #'
-#' @param beta Log OR per unit of `x`, or `NULL`.
-#' @param beta_sd Log OR per SD of `x`, or `NULL`.
+#' @param log_beta Log OR per unit of `x`, or `NULL`.
+#' @param log_OR_sd Log OR per SD of `x`, or `NULL`.
 #' @param sd_x SD of the predictor `x`.
 #'
 #' @return The per-unit log OR (a single number).
 #' @noRd
-resolve_beta_cont <- function(beta, beta_sd, sd_x) {
-  n_specified <- sum(!is.null(beta), !is.null(beta_sd))
-  if (n_specified != 1) stop("please specify exactly one of beta, beta_sd")
-  if (is.null(beta)) beta <- beta_sd / sd_x
-  beta
+resolve_beta_cont <- function(log_beta, log_OR_sd, sd_x) {
+  n_specified <- sum(!is.null(log_beta), !is.null(log_OR_sd))
+  if (n_specified != 1) stop("please specify exactly one of log_beta, log_OR_sd")
+  if (is.null(log_beta)) log_beta <- log_OR_sd / sd_x
+  log_beta
 }
 
 #' Resolve delta (in raw units of x) for a continuous predictor (internal)
@@ -187,12 +176,12 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' model, at a given total sample size `n`.
 #'
 #' @param p0 Outcome category probabilities at `x = mean(x)`.
-#' @param beta Log OR per unit of `x`. Exactly one of `beta`, `beta_sd` must
+#' @param log_beta Log OR per unit of `x`. Exactly one of `log_beta`, `log_OR_sd` must
 #'   be supplied.
-#' @param beta_sd Log OR per SD of `x`, given as an alternative to `beta` so
+#' @param log_OR_sd Log OR per SD of `x`, given as an alternative to `log_beta` so
 #'   `sd_x` and the effect size don't need to be reconciled by hand;
-#'   internally converted to `beta = beta_sd / sd_x`. Exactly one of
-#'   `beta`, `beta_sd` must be supplied.
+#'   internally converted to `log_beta = log_OR_sd / sd_x`. Exactly one of
+#'   `log_beta`, `log_OR_sd` must be supplied.
 #' @param sd_x SD of the predictor `x`. `x` is assumed to be centered (mean
 #'   0) and Gaussian, `x ~ N(0, sd_x^2)`.
 #' @param n Total sample size.
@@ -216,7 +205,7 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #'   this rescaling is exact). At most one of `delta`, `delta_sd` may be
 #'   supplied; defaults to 1 (raw unit of `x`) if neither is given. Note
 #'   `delta`/`delta_sd` only change what change in `x` the *output* is
-#'   expressed over; they do not alter `beta`/`beta_sd` itself, which is
+#'   expressed over; they do not alter `log_beta`/`log_OR_sd` itself, which is
 #'   always a per-1-unit/per-1-SD effect (see Details).
 #' @param delta_sd Change in `x`, in SDs of `x`, given as an alternative to
 #'   `delta` so `sd_x` doesn't need to be multiplied in by hand; internally
@@ -227,15 +216,15 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' `x` is assumed to be centered (mean 0) and Gaussian, `x ~ N(0, sd_x^2)`;
 #' `p0` is interpreted as the outcome-category probabilities at `x = 0`.
 #'
-#' `beta_sd` and `delta_sd` both reference the SD of `x`, but play different
-#' roles and are easy to conflate: `beta_sd` is *always* the log OR for a
-#' 1-SD change (it fixes `beta`), while `delta_sd` says how many SDs the
+#' `log_OR_sd` and `delta_sd` both reference the SD of `x`, but play different
+#' roles and are easy to conflate: `log_OR_sd` is *always* the log OR for a
+#' 1-SD change (it fixes `log_beta`), while `delta_sd` says how many SDs the
 #' *reported* OR should span. Because the log OR is linear in `x`, the
-#' reported log OR for a `delta_sd`-SD change is `beta_sd * delta_sd`, not `beta_sd`
-#' itself. For example, `beta_sd = log(1.5)` with `delta_sd = 2` reports a log OR of
+#' reported log OR for a `delta_sd`-SD change is `log_OR_sd * delta_sd`, not `log_OR_sd`
+#' itself. For example, `log_OR_sd = log(1.5)` with `delta_sd = 2` reports a log OR of
 #' `log(1.5) * 2 = log(2.25)` (the log OR for a 2-SD change), not `log(1.5)` (see final example
 #' below). To report an OR of 1.5 *for* a 2-SD change, supply
-#' `beta_sd = log(1.5) / 2` together with `delta_sd = 2`.
+#' `log_OR_sd = log(1.5) / 2` together with `delta_sd = 2`.
 #'
 #' @return A named numeric vector with elements `beta`, `SE`, `lower`,
 #'   `upper` (the last two on the OR scale), all expressed for the change
@@ -244,27 +233,27 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #'
 #' @examples
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-#' se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
-#' se_cont_po(p0, beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
+#' se_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
+#' se_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, n = 30, method = "ologit")
 #' # equivalently, specifying the effect as log OR per SD of x
-#' se_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
+#' se_cont_po(p0, log_OR_sd = log(1.5), sd_x = 0.5, n = 30, method = "whitehead")
 #' # OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x
-#' se_cont_po(p0, beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
+#' se_cont_po(p0, log_beta = log(1.5), sd_x = 1, n = 30, delta = 2, method = "whitehead")
 #' # equivalently, specifying the change directly in SDs of x
-#' se_cont_po(p0, beta_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' se_cont_po(p0, log_OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 #'
-#' # beta_sd is per 1 SD; delta_sd only rescales the *output*, so with
-#' # delta_sd = 2 the reported log OR is beta_sd*2, not beta_sd:
-#' fit <- se_cont_po(p0, beta_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' # log_OR_sd is per 1 SD; delta_sd only rescales the *output*, so with
+#' # delta_sd = 2 the reported log OR is log_OR_sd*2, not log_OR_sd:
+#' fit <- se_cont_po(p0, log_OR_sd = log(1.5), sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 #' exp(fit[["beta"]])  # 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5
-#' # to instead report an OR of 1.5 *for* a 2-SD change, halve beta_sd:
-#' fit2 <- se_cont_po(p0, beta_sd = log(1.5) / 2, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
+#' # to instead report an OR of 1.5 *for* a 2-SD change, halve log_OR_sd:
+#' fit2 <- se_cont_po(p0, log_OR_sd = log(1.5) / 2, sd_x = 1, n = 30, delta_sd = 2, method = "whitehead")
 #' exp(fit2[["beta"]])  # 1.5, as intended
-se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, beta_sd = NULL,
+se_cont_po <- function(p0, log_beta = NULL, sd_x, n, R2 = 0, log_OR_sd = NULL,
                        method = c("ologit", "whitehead"), ngrid = 15, conf = 0.95,
                        delta = NULL, delta_sd = NULL) {
   method <- match.arg(method)
-  beta <- resolve_beta_cont(beta, beta_sd, sd_x)
+  log_beta <- resolve_beta_cont(log_beta, log_OR_sd, sd_x)
   delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   levels_n <- length(p0)
@@ -273,30 +262,30 @@ se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, beta_sd = NULL,
   if (method == "whitehead") {
     ngrid_wh <- 2000
     xs <- stats::qnorm((1:ngrid_wh - 0.5) / ngrid_wh) * sd_x  # quantile grid for x ~ N(0, sd_x)
-    pm <- sapply(xs, function(x) diff(c(0, stats::plogis(th - beta * x), 1)))  # levels_n x ngrid_wh
+    pm <- sapply(xs, function(x) diff(c(0, stats::plogis(th - log_beta * x), 1)))  # levels_n x ngrid_wh
     pmbar <- rowMeans(pm)
     se <- sqrt(3 / (n * sd_x^2 * (1 - sum(pmbar^3)) * (1 - R2)))
-    beta_est <- beta
+    log_beta_est <- log_beta
   } else {
     gh <- statmod::gauss.quad(ngrid, kind = "hermite")
     xs <- sqrt(2) * sd_x * gh$nodes            # nodes rescaled to x ~ N(0, sd_x^2)
     wq <- gh$weights / sqrt(pi)                 # mixture weights, sum to 1
-    pm <- sapply(xs, function(x) diff(c(0, stats::plogis(th - beta * x), 1)))  # levels_n x ngrid
+    pm <- sapply(xs, function(x) diff(c(0, stats::plogis(th - log_beta * x), 1)))  # levels_n x ngrid
 
     level_int <- rep(seq_len(levels_n), times = ngrid)
     x_rep <- rep(xs, each = levels_n)
     w <- as.vector(pm) * rep(wq, each = levels_n) * n * (1 - R2)
     fit <- fit_cumlogit_weighted(level_int, x_rep, w)
     se <- fit$SE_b
-    beta_est <- fit$b
+    log_beta_est <- fit$b
   }
 
-  beta_d <- delta * beta_est
+  log_beta_d <- delta * log_beta_est
   se_d <- delta * se
-  c(beta = beta_d, SE = se_d, lower = exp(beta_d - z * se_d), upper = exp(beta_d + z * se_d))
+  c(beta = log_beta_d, SE = se_d, lower = exp(log_beta_d - z * se_d), upper = exp(log_beta_d + z * se_d))
 }
 
-#' Sample size for a target OR precision, continuous predictor
+#' Sample size for a target common OR precision, continuous predictor
 #'
 #' Computes the total sample size `n` needed so that the confidence
 #' interval for the OR per `delta` units of a continuous predictor `x` has
@@ -319,24 +308,24 @@ se_cont_po <- function(p0, beta = NULL, sd_x, n, R2 = 0, beta_sd = NULL,
 #'
 #' @examples
 #' p0 <- c(0.10, 0.15, 0.15, 0.20, 0.20, 0.10, 0.10)
-#' n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
-#' n_precision_cont_po(p0, beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
+#' n_precision_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+#' n_precision_cont_po(p0, log_beta = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "ologit")
 #' # equivalently, specifying the effect as log OR per SD of x
-#' n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
+#' n_precision_cont_po(p0, log_OR_sd = log(1.5), sd_x = 0.5, ratio_UL = 3, method = "whitehead")
 #' # OR of 1.5 per 2-SD change in x, specifying the change directly in SDs
-#' n_precision_cont_po(p0, beta_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
-n_precision_cont_po <- function(p0, beta = NULL, sd_x, ratio_UL, delta = NULL, R2 = 0, conf = 0.95,
-                                beta_sd = NULL, delta_sd = NULL, method = c("ologit", "whitehead"),
+#' n_precision_cont_po(p0, log_OR_sd = log(1.5), sd_x = 0.5, delta_sd = 2, ratio_UL = 3, method = "whitehead")
+n_precision_cont_po <- function(p0, log_beta = NULL, sd_x, ratio_UL, delta = NULL, R2 = 0, conf = 0.95,
+                                log_OR_sd = NULL, delta_sd = NULL, method = c("ologit", "whitehead"),
                                 ngrid = 15, n0 = 1000) {
   method <- match.arg(method)
-  beta <- resolve_beta_cont(beta, beta_sd, sd_x)
+  log_beta <- resolve_beta_cont(log_beta, log_OR_sd, sd_x)
   delta <- resolve_delta_cont(delta, delta_sd, sd_x)
   z <- stats::qnorm(1 - (1 - conf) / 2)
   target_se <- log(ratio_UL) / (2 * z * delta)              # target SE per 1 unit of x
-  fit0 <- se_cont_po(p0, beta = beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
+  fit0 <- se_cont_po(p0, log_beta = log_beta, sd_x = sd_x, n = n0, R2 = R2, method = method, ngrid = ngrid)
   n <- ceiling(n0 * (fit0[["SE"]] / target_se)^2)
-  list(n = n, or = exp(delta * beta), method = method,
-       lci = exp(delta * (beta - z * target_se)), uci = exp(delta * (beta + z * target_se)))
+  list(n = n, or = exp(delta * log_beta), method = method,
+       lci = exp(delta * (log_beta - z * target_se)), uci = exp(delta * (log_beta + z * target_se)))
 }
 
 
