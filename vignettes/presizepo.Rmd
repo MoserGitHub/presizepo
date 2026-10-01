@@ -68,8 +68,8 @@ where $(1 - R^2)$ adjusts for information loss when the predictor is correlated 
 
 White et al. (2023) distinguish between three statistical approaches for hypothesis testing and sample size calculations:
 
-- **Method NN** (Local/Whitehead): Uses variance computed under assumptions of small treatment effects; based on the null variance but applied in the local neighborhood. This is Whitehead's (1993) closed-form delta-method formula, and it is **implemented in presizepo** as the `"whitehead"` method.
-- **Method NA** (Distant/Score test): Uses variance $V_N$ estimated strictly under the null hypothesis ($\beta = 0$, OR = 1); appropriate for score test-based inference. **Not implemented in presizepo**.
+- **Method NN** (Local/Whitehead): Uses variance computed under assumptions of small treatment effects based on the null variance. This is Whitehead's (1993) formula.
+- **Method NA** (Distant/Score test): Uses variance $V_N$ estimated under the null hypothesis ($\beta = 0$, OR = 1) and alternative hypothesis; appropriate for score test-based inference. **Not implemented in presizepo**.
 - **Method AA** (Wald test): Uses variance $V_A$ estimated under the alternative hypothesis (at the anticipated effect size); appropriate for Wald test-based inference. This is **implemented in presizepo** as the `"ologit"` method.
 
 `presizepo` implements both the NN (Whitehead) and AA methods, which are appropriate for precision-based calculations (confidence interval width), where we condition on the anticipated effect size.
