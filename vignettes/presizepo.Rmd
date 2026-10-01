@@ -21,7 +21,7 @@ library(presizepo)
 ## Overview
 
 `presizepo` computes precision-based (confidence-interval width) sample
-sizes and standard errors for the log odds ratio in a proportional-odds
+sizes and standard errors for the log odds ratio from a proportional-odds
 (ordinal logistic regression) model. Two predictor types are supported:
 
 * a **binary** group predictor (e.g. treatment vs. control), via
