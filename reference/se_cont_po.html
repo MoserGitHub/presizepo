@@ -60,7 +60,7 @@ model, at a given total sample size <code>n</code>.</p>
 <span>  <span class="va">sd_x</span>,</span>
 <span>  <span class="va">n</span>,</span>
 <span>  R2 <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  OR_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  beta_sd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ologit"</span>, <span class="st">"whitehead"</span><span class="op">)</span>,</span>
 <span>  ngrid <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  conf <span class="op">=</span> <span class="fl">0.95</span>,</span>
@@ -78,12 +78,13 @@ model, at a given total sample size <code>n</code>.</p>
 
 
 <dt id="arg-beta">beta<a class="anchor" aria-label="anchor" href="#arg-beta"></a></dt>
-<dd><p>Log OR per unit of <code>x</code>. Exactly one of <code>beta</code>, <code>OR_sd</code> must
+<dd><p>Log OR per unit of <code>x</code>. Exactly one of <code>beta</code>, <code>beta_sd</code> must
 be supplied.</p></dd>
 
 
 <dt id="arg-sd-x">sd_x<a class="anchor" aria-label="anchor" href="#arg-sd-x"></a></dt>
-<dd><p>SD of the predictor <code>x</code>.</p></dd>
+<dd><p>SD of the predictor <code>x</code>. <code>x</code> is assumed to be centered (mean
+0) and Gaussian, <code>x ~ N(0, sd_x^2)</code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -96,12 +97,11 @@ be supplied.</p></dd>
 factor of <code>1 - R2</code>).</p></dd>
 
 
-<dt id="arg-or-sd">OR_sd<a class="anchor" aria-label="anchor" href="#arg-or-sd"></a></dt>
-<dd><p>Odds ratio per SD of <code>x</code> (i.e. the OR comparing <code>x</code> one SD
-above the mean to the mean), given as an alternative to <code>beta</code> so
+<dt id="arg-beta-sd">beta_sd<a class="anchor" aria-label="anchor" href="#arg-beta-sd"></a></dt>
+<dd><p>Log OR per SD of <code>x</code>, given as an alternative to <code>beta</code> so
 <code>sd_x</code> and the effect size don't need to be reconciled by hand;
-internally converted to <code>beta = log(OR_sd) / sd_x</code>. Exactly one of
-<code>beta</code>, <code>OR_sd</code> must be supplied.</p></dd>
+internally converted to <code>beta = beta_sd / sd_x</code>. Exactly one of
+<code>beta</code>, <code>beta_sd</code> must be supplied.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -131,7 +131,7 @@ CI) is expressed; <code>beta</code>, <code>SE</code>, and the CI limits are all 
 this rescaling is exact). At most one of <code>delta</code>, <code>delta_sd</code> may be
 supplied; defaults to 1 (raw unit of <code>x</code>) if neither is given. Note
 <code>delta</code>/<code>delta_sd</code> only change what change in <code>x</code> the <em>output</em> is
-expressed over; they do not alter <code>beta</code>/<code>OR_sd</code> itself, which is
+expressed over; they do not alter <code>beta</code>/<code>beta_sd</code> itself, which is
 always a per-1-unit/per-1-SD effect (see Details).</p></dd>
 
 
@@ -150,15 +150,17 @@ in <code>x</code> given by <code>delta</code>/<code>delta_sd</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p><code>OR_sd</code> and <code>delta_sd</code> both reference the SD of <code>x</code>, but play different
-roles and are easy to conflate: <code>OR_sd</code> is <em>always</em> the odds ratio for a
+    <p><code>x</code> is assumed to be centered (mean 0) and Gaussian, <code>x ~ N(0, sd_x^2)</code>;
+<code>p0</code> is interpreted as the outcome-category probabilities at <code>x = 0</code>.</p>
+<p><code>beta_sd</code> and <code>delta_sd</code> both reference the SD of <code>x</code>, but play different
+roles and are easy to conflate: <code>beta_sd</code> is <em>always</em> the log OR for a
 1-SD change (it fixes <code>beta</code>), while <code>delta_sd</code> says how many SDs the
 <em>reported</em> OR should span. Because the log OR is linear in <code>x</code>, the
-reported OR for a <code>delta_sd</code>-SD change is <code>OR_sd^delta_sd</code>, not <code>OR_sd</code>
-itself. For example, <code>OR_sd = 1.5</code> with <code>delta_sd = 2</code> reports an OR of
-<code>1.5^2 = 2.25</code> (the OR for a 2-SD change), not 1.5 (see final example
+reported log OR for a <code>delta_sd</code>-SD change is <code>beta_sd * delta_sd</code>, not <code>beta_sd</code>
+itself. For example, <code>beta_sd = log(1.5)</code> with <code>delta_sd = 2</code> reports a log OR of
+<code>log(1.5) * 2 = log(2.25)</code> (the log OR for a 2-SD change), not <code>log(1.5)</code> (see final example
 below). To report an OR of 1.5 <em>for</em> a 2-SD change, supply
-<code>OR_sd = sqrt(1.5)</code> together with <code>delta_sd = 2</code>.</p>
+<code>beta_sd = log(1.5) / 2</code> together with <code>delta_sd = 2</code>.</p>
     </div>
 
     <div id="ref-examples">
@@ -170,26 +172,26 @@ below). To report an OR of 1.5 <em>for</em> a 2-SD change, supply
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      beta        SE     lower     upper </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.4054654 0.6445034 0.4241204 5.3051012 </span>
-<span class="r-in"><span><span class="co"># equivalently, specifying the effect as an OR per SD of x</span></span></span>
-<span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span><span class="op">^</span><span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># equivalently, specifying the effect as log OR per SD of x</span></span></span>
+<span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      beta        SE     lower     upper </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.4054651 0.6406679 0.4273205 5.2653689 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8109302 0.6404217 0.6412902 7.8942423 </span>
 <span class="r-in"><span><span class="co"># OR/CI for a 2-unit (here, 2-SD, since sd_x = 1) change in x</span></span></span>
 <span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      beta        SE     lower     upper </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.8109302 0.6404217 0.6412902 7.8942423 </span>
 <span class="r-in"><span><span class="co"># equivalently, specifying the change directly in SDs of x</span></span></span>
-<span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      beta        SE     lower     upper </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.8109302 0.6404217 0.6412902 7.8942423 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># OR_sd is per 1 SD; delta_sd only rescales the *output*, so with</span></span></span>
-<span class="r-in"><span><span class="co"># delta_sd = 2 the reported OR is OR_sd^2, not OR_sd:</span></span></span>
-<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fl">1.5</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># beta_sd is per 1 SD; delta_sd only rescales the *output*, so with</span></span></span>
+<span class="r-in"><span><span class="co"># delta_sd = 2 the reported log OR is beta_sd*2, not beta_sd:</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">fit</span><span class="op">[[</span><span class="st">"beta"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>  <span class="co"># 2.25 = 1.5^2, the OR for a 2-SD change, not 1.5</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.25</span>
-<span class="r-in"><span><span class="co"># to instead report an OR of 1.5 *for* a 2-SD change, halve OR_sd on the log scale:</span></span></span>
-<span class="r-in"><span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, OR_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># to instead report an OR of 1.5 *for* a 2-SD change, halve beta_sd:</span></span></span>
+<span class="r-in"><span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu">se_cont_po</span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span>, sd_x <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">30</span>, delta_sd <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"whitehead"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">[[</span><span class="st">"beta"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>  <span class="co"># 1.5, as intended</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.5</span>
 </code></pre></div>

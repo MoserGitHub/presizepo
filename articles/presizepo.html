@@ -77,7 +77,7 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p><code>presizepo</code> computes precision-based (confidence-interval
-width) sample sizes and standard errors for the log odds ratio in a
+width) sample sizes and standard errors for the log odds ratio from a
 proportional-odds (ordinal logistic regression) model. Two predictor
 types are supported:</p>
 <ul>
@@ -215,11 +215,87 @@ closed-form variance formula at fixed cutpoints derived from
 <p>An <code>R2</code> argument allows for the predictor’s effective
 information to be reduced when other covariates explain some of its
 variance (e.g. when adjusting for baseline covariates).</p>
+<div class="section level3">
+<h3 id="effect-size-parameterization-beta-vs-beta_sd">Effect size parameterization: <code>beta</code> vs
+<code>beta_sd</code><a class="anchor" aria-label="anchor" href="#effect-size-parameterization-beta-vs-beta_sd"></a>
+</h3>
+<p>The effect size can be specified in two ways:</p>
+<ul>
+<li>
+<code>beta</code>: log OR per <strong>raw unit</strong> of
+<code>x</code>
+</li>
+<li>
+<code>beta_sd</code>: log OR per <strong>SD</strong> of
+<code>x</code>
+</li>
+</ul>
+<p>These are equivalent ways of specifying the same effect. For example,
+with <code>sd_x = 0.5</code>, a log OR per raw unit of
+<code>log(1.5)</code> is equivalent to a log OR per SD of
+<code>log(1.5) * 0.5</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># beta: log OR per raw unit</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
+<span></span>
+<span><span class="co"># beta_sd: log OR per SD (equivalent when sd_x = 0.5)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="change-parameterization-delta-vs-delta_sd">Change parameterization: <code>delta</code> vs
+<code>delta_sd</code><a class="anchor" aria-label="anchor" href="#change-parameterization-delta-vs-delta_sd"></a>
+</h3>
+<p>Similarly, the reported change in <code>x</code> can be expressed in
+two ways:</p>
+<ul>
+<li>
+<code>delta</code>: change in <strong>raw units</strong> of
+<code>x</code>
+</li>
+<li>
+<code>delta_sd</code>: change in <strong>SDs</strong> of
+<code>x</code>
+</li>
+</ul>
+<p>These control only what change in <code>x</code> the <em>output</em>
+is expressed over; they don’t change the underlying effect size. For
+example, with <code>sd_x = 0.5</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># delta: OR for a 1-unit change in x</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.4054650 0.2496151 0.9196413 2.4466056</span></span>
+<span></span>
+<span><span class="co"># delta_sd: OR for a 1-SD change in x (= 0.5 raw units when sd_x = 0.5)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span></code></pre></div>
+<p>Note that the reported log ORs differ: with <code>delta = 0.5</code>
+we get the same result as <code>delta_sd = 1</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># delta = 0.5 raw units vs delta_sd = 1 SD (equivalent when sd_x = 0.5)</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta <span class="op">=</span> <span class="fl">0.5</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span>
+<span><span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, n <span class="op">=</span> <span class="fl">200</span>, delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      beta        SE     lower     upper </span></span>
+<span><span class="co">#&gt; 0.2027325 0.1248076 0.9589793 1.5641629</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="sample-size-for-a-target-precision-1">Sample size for a target precision<a class="anchor" aria-label="anchor" href="#sample-size-for-a-target-precision-1"></a>
+</h3>
 <p><code><a href="../reference/n_precision_cont_po.html">n_precision_cont_po()</a></code> gives the sample size for a target
 CI-width ratio, expressed for the OR per <code>delta</code> units of
-<code>x</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
+<code>x</code>. It supports the same
+<code>beta</code>/<code>beta_sd</code> and
+<code>delta</code>/<code>delta_sd</code> options:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Using beta and delta</span></span>
+<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                     delta <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $n</span></span>
 <span><span class="co">#&gt; [1] 159</span></span>
@@ -234,7 +310,98 @@ CI-width ratio, expressed for the OR per <code>delta</code> units of
 <span><span class="co">#&gt; [1] 0.8660254</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $uci</span></span>
-<span><span class="co">#&gt; [1] 2.598076</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2.598076</span></span>
+<span></span>
+<span><span class="co"># Using beta_sd and delta_sd (specifying effect and change per SD)</span></span>
+<span><span class="fu"><a href="../reference/n_precision_cont_po.html">n_precision_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta_sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>, sd_x <span class="op">=</span> <span class="fl">0.5</span>, ratio_UL <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                     delta_sd <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $n</span></span>
+<span><span class="co">#&gt; [1] 40</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $or</span></span>
+<span><span class="co">#&gt; [1] 1.224745</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $method</span></span>
+<span><span class="co">#&gt; [1] "ologit"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $lci</span></span>
+<span><span class="co">#&gt; [1] 0.7071068</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $uci</span></span>
+<span><span class="co">#&gt; [1] 2.12132</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="simulation-validation">Simulation validation<a class="anchor" aria-label="anchor" href="#simulation-validation"></a>
+</h2>
+<p>To validate that the theoretical standard errors match empirical
+results, we can simulate data from a proportional-odds model and compare
+the empirical standard error with the one predicted by
+<code><a href="../reference/se_cont_po.html">se_cont_po()</a></code>.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set up simulation parameters</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1234</span><span class="op">)</span></span>
+<span><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span><span class="op">)</span></span>
+<span><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="va">sd_x</span> <span class="op">&lt;-</span> <span class="fl">0.5</span></span>
+<span><span class="va">n_sim</span> <span class="op">&lt;-</span> <span class="fl">500</span>  <span class="co"># number of simulations</span></span>
+<span><span class="va">n_obs</span> <span class="op">&lt;-</span> <span class="fl">200</span>  <span class="co"># observations per simulation</span></span>
+<span></span>
+<span><span class="co"># Predicted SE from presizepo</span></span>
+<span><span class="va">pred_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/se_cont_po.html">se_cont_po</a></span><span class="op">(</span><span class="va">p0</span>, beta <span class="op">=</span> <span class="va">beta</span>, sd_x <span class="op">=</span> <span class="va">sd_x</span>, n <span class="op">=</span> <span class="va">n_obs</span>, method <span class="op">=</span> <span class="st">"ologit"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Predicted SE (from presizepo):"</span>, <span class="va">pred_se</span><span class="op">[[</span><span class="st">"SE"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Predicted SE (from presizepo): 0.2496151</span></span>
+<span></span>
+<span><span class="co"># Simulation: fit the model many times and collect beta estimates</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1234</span><span class="op">)</span></span>
+<span><span class="va">beta_hats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n_sim</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sim</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Generate predictor x from N(0, sd_x^2)</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_obs</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="va">sd_x</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># Generate ordinal outcome from proportional-odds model</span></span>
+<span>  <span class="co"># Compute cumulative probabilities: P(Y &lt;= k) for k = 0, ..., K-2</span></span>
+<span>  <span class="va">cutpoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">p0</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">p0</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">eta</span> <span class="op">&lt;-</span> <span class="va">beta</span> <span class="op">*</span> <span class="va">x</span></span>
+<span>  <span class="va">p_cumulative</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">cutpoints</span>, <span class="va">eta</span>, <span class="st">"-"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># (K-1) x n matrix</span></span>
+<span>  </span>
+<span>  <span class="co"># Convert to category probabilities: P(Y = k) for k = 1, ..., K</span></span>
+<span>  <span class="va">p_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">p_cumulative</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, </span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">p_cumulative</span>, margin <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                 <span class="fl">1</span> <span class="op">-</span> <span class="va">p_cumulative</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">p_cumulative</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># Generate outcomes: sample category for each observation</span></span>
+<span>  <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">p_cat</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">p0</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">1</span>, prob <span class="op">=</span> <span class="va">p</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># Fit proportional-odds model</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/MASS/man/polr.html" class="external-link">polr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="va">x</span>, method <span class="op">=</span> <span class="st">"logistic"</span>, Hess <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># Extract beta estimate (slope coefficient)</span></span>
+<span>  <span class="va">beta_hats</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Empirical SE</span></span>
+<span><span class="va">emp_se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">beta_hats</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Empirical SE (from simulation):"</span>, <span class="va">emp_se</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Empirical SE (from simulation): 0.2521338</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Ratio (empirical / predicted):"</span>, <span class="va">emp_se</span> <span class="op">/</span> <span class="va">pred_se</span><span class="op">[[</span><span class="st">"SE"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Ratio (empirical / predicted): 1.01009</span></span></code></pre></div>
+<p>The empirical SE from the simulation should closely match the
+predicted SE, validating the theoretical calculations. The ratio should
+be close to 1.</p>
+<p>We can also visualize the distribution of beta estimates:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">beta_hats</span>, breaks <span class="op">=</span> <span class="fl">30</span>, main <span class="op">=</span> <span class="st">"Distribution of beta estimates from simulation"</span>,</span>
+<span>     xlab <span class="op">=</span> <span class="st">"Estimated beta"</span>, freq <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="va">beta</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">beta_hats</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"True beta"</span>, <span class="st">"Mean of estimates"</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="presizepo_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
