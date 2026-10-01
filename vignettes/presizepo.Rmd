@@ -41,7 +41,7 @@ anticipated effect size grows.
 
 `presizepo` offers two approaches for calculating the standard error of the log odds ratio.
 
-### Whitehead's (1993) Formula
+### Whitehead's (1993) Formula — The NN (Local) Method
 
 Whitehead (1993) originally derived his formula for **hypothesis testing** sample size calculations with specified probability of Type I error ($\alpha$) and power ($1 - \beta$). In this setting the sample size can be generally formulated as (see Julious (2004))
 
@@ -54,6 +54,8 @@ where $d$ is the anticipated log OR and $\bar{p}_k$ is the average probability f
 $$\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_{k} \bar{p}_k^3)}}.$$
 From this relationship, one can solve for the sample size needed to achieve a target confidence interval width.
 
+White et al. (2023) classify this as the **NN (Local) method**, which is based on a "local" assumption (small treatment effects) and uses the variance computed at the null hypothesis. However, for precision-based sample size calculations where you condition on an anticipated effect size, this same formula provides the information structure regardless of whether you're explicitly doing hypothesis testing.
+
 For a continuous predictor $x \sim N(0, \sigma_x^2)$ one can adapt Whitehead's formula to:
 
 $$\text{SE}(d) = \sqrt{\frac{3(r+1)^2}{rn\sigma_x^2 (1 - \sum_{k} \bar{p}_k^3) (1 - R^2)}},$$
@@ -62,15 +64,21 @@ where $(1 - R^2)$ adjusts for information loss when the predictor is correlated 
 
 **Implementation details**: For a continuous predictor, the average probabilities $\bar{p}_k$ are computed by integrating the outcome probabilities across the distribution of $x$ using a fixed quantile grid approach with 2000 points from $x \sim N(0, \sigma_x^2)$.
 
-### White et al. (2023) Method: "ologit"
+### White et al. (2023) Methods: Three Approaches (NN, NA, AA)
 
-White et al. (2023) propose a more direct approach that avoids delta-method approximation by fitting a weighted proportional-odds model to the anticipated data distribution and extracting the standard error from the observed information matrix.
+White et al. (2023) distinguish between three statistical approaches for hypothesis testing and sample size calculations:
 
-For binary predictors the algorithm is:
+- **Method NN** (Local/Whitehead): Uses variance computed under assumptions of small treatment effects; based on the null variance but applied in the local neighborhood. This is Whitehead's (1993) closed-form delta-method formula, and it is **implemented in presizepo** as the `"whitehead"` method.
+- **Method NA** (Distant/Score test): Uses variance $V_N$ estimated strictly under the null hypothesis ($\beta = 0$, OR = 1); appropriate for score test-based inference. **Not implemented in presizepo**.
+- **Method AA** (Wald test): Uses variance $V_A$ estimated under the alternative hypothesis (at the anticipated effect size); appropriate for Wald test-based inference. This is **implemented in presizepo** as the `"ologit"` method.
 
-1. **Construct anticipated data**: Create a weighted frequency table from the anticipated outcome category probabilities at each treatment level (control and treatment arms).
+`presizepo` implements both the NN (Whitehead) and AA methods, which are appropriate for precision-based calculations (confidence interval width), where we condition on the anticipated effect size.
+
+For binary predictors the AA algorithm is:
+
+1. **Construct anticipated data**: Create a weighted frequency table from the anticipated outcome category probabilities at each treatment level (control and treatment arms), using the specified effect size (OR).
 2. **Fit weighted proportional-odds model**: Fit a proportional odds model to this table, with weights proportional to arm size and allocation ratio.
-3. **Extract SE**: Read the standard error of the treatment coefficient ($\beta$) directly from the inverse Hessian matrix (observed information matrix).
+3. **Extract SE**: Read the standard error of the treatment coefficient ($\beta$) directly from the inverse Hessian matrix (observed information matrix), which gives $\sqrt{V_A/n}$.
 
 For continuous $x \sim N(0, \sigma_x^2)$ one adapts to:
 

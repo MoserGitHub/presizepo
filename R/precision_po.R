@@ -28,21 +28,22 @@ build_arm_probs <- function(pc, OR) {
 #' model, at a given total sample size `n`.
 #'
 #' Two approaches to the SE are supported, selectable via `method`:
-#' * `"whitehead"` - Whitehead's (1993) formula, originally derived for
-#'   hypothesis testing with Type I error \eqn{\alpha} and power \eqn{1-\beta}
-#'   via \eqn{n = (z_{\alpha/2} + z_\beta)^2 / \text{Information}}. For
-#'   precision-based calculations, the same information structure is used to
-#'   compute the standard error: \eqn{\text{SE}(\log \text{OR}) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_k \bar{p}_k^3)}}}
+#' * `"whitehead"` - Whitehead's (1993) formula, classified by White et al.
+#'   (2023) as the **NN (Local)** method. It provides a closed-form delta-method
+#'   approximation: \eqn{\text{SE}(\log \text{OR}) = \sqrt{\frac{3(r+1)^2}{rn(1 - \sum_k \bar{p}_k^3)}}}
 #'   where \eqn{\bar{p}_k = (p_{c,k} + r \cdot p_{t,k}) / (1 + r)} is the
 #'   weighted average probability for category \eqn{k}. The denominator
 #'   \eqn{(1 - \sum_k \bar{p}_k^3)} is the information per subject from the
-#'   ordinal outcome, which measures discriminatory power and depends only on
-#'   the outcome distribution, not on \eqn{\alpha} or \eqn{\beta}.
-#' * `"ologit"` (default) - White, Marley-Zagar, Morris, Parmar, Royston & Babiker
-#'   (2023) fit a weighted proportional-odds model to the
-#'   anticipated distribution and use the SE from the observed information
-#'   matrix. This approach avoids the delta-method approximation and directly
-#'   accounts for joint estimation of intercepts and slope.
+#'   ordinal outcome, which measures discriminatory power. The NN method is fast
+#'   and transparent but slightly anti-conservative.
+#' * `"ologit"` (default) - The **AA (Wald test)** variant from White et al.
+#'   (2023). Fits a weighted proportional-odds model to the anticipated
+#'   distribution (at the specified effect size) and extracts the SE from the
+#'   observed information matrix. More computationally intensive than Whitehead
+#'   but more accurate, especially for large effect sizes. White et al. also
+#'   describe the NA variant (for score tests), which requires fitting under
+#'   the null hypothesis and is not implemented here because it is less natural
+#'   for precision-based calculations where the effect size is specified upfront.
 #'
 #' @param pc Control-arm category probabilities (sum to 1).
 #' @param OR Common odds ratio (experimental vs
@@ -230,21 +231,23 @@ resolve_delta_cont <- function(delta, delta_sd, sd_x) {
 #' @details
 #' **Calculation Methods**:
 #'
-#' * **Whitehead**: Extends Whitehead's (1993) information-based formula to
-#'   continuous predictors. The standard error is
+#' * **Whitehead** (NN method): Extends Whitehead's (1993) information-based
+#'   formula to continuous predictors (White et al.'s NN Local method). The
+#'   standard error is
 #'   \eqn{\text{SE}(\beta) = \sqrt{\frac{3(r+1)^2}{rn \sigma_x^2 (1 - \sum_k \bar{p}_k^3) (1 - R^2)}}}
 #'   where \eqn{r} is the allocation ratio (treatment:control). Average outcome
 #'   probabilities \eqn{\bar{p}_k} are computed by numerical integration (quantile
 #'   grid method with 2000 points) over `x ~ N(0, sd_x^2)`, and \eqn{R^2} adjusts
-#'   for confounding by other covariates.
+#'   for confounding by other covariates. Fast and transparent but slightly
+#'   anti-conservative.
 #'
-#' * **ologit**: Fits a weighted proportional-odds model to pseudo-observations
-#'   created by: (1) evaluating outcome probabilities at Gauss-Hermite
-#'   quadrature nodes scaled to `x ~ N(0, sd_x^2)`, (2) weighting by node
-#'   weight × sample size × (1 - R2), and (3) extracting the SE of the slope
-#'   coefficient from the inverse Hessian. This approach avoids delta-method
-#'   approximation and is more accurate for large effect sizes and skewed
-#'   distributions.
+#' * **ologit** (AA method, White et al.'s Wald approach): Fits a weighted
+#'   proportional-odds model to pseudo-observations created by: (1) evaluating
+#'   outcome probabilities at Gauss-Hermite quadrature nodes scaled to
+#'   `x ~ N(0, sd_x^2)`, (2) weighting by node weight × sample size × (1 - R2),
+#'   and (3) extracting the SE of the slope coefficient from the inverse Hessian.
+#'   This approach avoids delta-method approximation and is more accurate for
+#'   large effect sizes and skewed distributions.
 #'
 #' `x` is assumed to be centered (mean 0) and Gaussian, `x ~ N(0, sd_x^2)`;
 #' `p0` is interpreted as the outcome-category probabilities at `x = 0`.
