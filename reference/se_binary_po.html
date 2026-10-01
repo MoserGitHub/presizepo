@@ -54,25 +54,20 @@ model, at a given total sample size <code>n</code>.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">se_binary_po</span><span class="op">(</span></span>
-<span>  <span class="va">p0</span>,</span>
-<span>  OR <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  p1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rr <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">n</span>,</span>
-<span>  r <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ologit"</span>, <span class="st">"whitehead"</span><span class="op">)</span>,</span>
-<span>  conf <span class="op">=</span> <span class="fl">0.95</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">se_binary_po</span><span class="op">(</span><span class="va">pc</span>, <span class="va">OR</span>, <span class="va">n</span>, r <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ologit"</span>, <span class="st">"whitehead"</span><span class="op">)</span>, conf <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-or-pe-rr">OR, pe, rr<a class="anchor" aria-label="anchor" href="#arg-or-pe-rr"></a></dt>
-<dd><p>Exactly one, defining the experimental arm; see
-<code>build_arm_probs()</code>.</p></dd>
+<dl><dt id="arg-pc">pc<a class="anchor" aria-label="anchor" href="#arg-pc"></a></dt>
+<dd><p>Control-arm category probabilities (sum to 1).</p></dd>
+
+
+<dt id="arg-or">OR<a class="anchor" aria-label="anchor" href="#arg-or"></a></dt>
+<dd><p>Proportional (cumulative) odds ratio for the experimental vs.
+control arm.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -90,10 +85,6 @@ model, at a given total sample size <code>n</code>.</p>
 
 <dt id="arg-conf">conf<a class="anchor" aria-label="anchor" href="#arg-conf"></a></dt>
 <dd><p>Confidence level for the reported interval.</p></dd>
-
-
-<dt id="arg-pc">pc<a class="anchor" aria-label="anchor" href="#arg-pc"></a></dt>
-<dd><p>Control-arm category probabilities (sum to 1).</p></dd>
 
 </dl></div>
     <div id="value">
